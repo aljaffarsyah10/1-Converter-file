@@ -89,3 +89,4 @@ Hasil build tersimpan pada direktori:
 5. Tarik dan lepas berkas ke area dropzone atau klik **Pilih Berkas Desktop**.
 6. Atur preferensi output jika diperlukan, lalu klik **Mulai Konversi**.
 7. Setelah selesai, klik **Buka Berkas** untuk langsung melihat hasilnya!
+
