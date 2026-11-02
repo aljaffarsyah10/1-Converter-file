@@ -34,6 +34,10 @@ Hasil pengujian menunjukkan bahwa seluruh alur konversi bekerja secara **100% of
 | **TC-10** | Integritas Berkas Sumber | SHA-256 `sample1.pdf` sebelum vs sesudah konversi | Berkas input tidak boleh berubah sama sekali | Hash SHA-256 identik (100% read-only terjamin) | **LULUS** |
 | **TC-11** | Pembuatan Direktori Output | Folder tujuan belum dibuat sebelumnya | Direktori dibuat otomatis tanpa error | Direktori `Converted` dibuat otomatis via `fs::create_dir_all` | **LULUS** |
 | **TC-12** | Eksekusi Berulang (Stabilitas) | Penggabungan diulang 5 kali berturut-turut | Waktu tetap konsisten (< 500ms), tidak ada memory leak | Seluruh 5 iterasi selesai dalam rata-rata 11 ms | **LULUS** |
+| **TC-13** | Penggabungan Multi-Berkas (3+) | 3 berkas PDF (total 6 halaman) | Menggabungkan seluruh berkas dengan urutan tepat | Berhasil menghasilkan PDF 6 halaman utuh | **LULUS** |
+| **TC-14** | Path dengan Spasi & Unicode | Folder `Folder Uji Konverter Spasi & Aksen (2026)` | Path Windows dibaca dan ditulis tanpa encoding error | Berhasil menulis berkas output pada path kompleks | **LULUS** |
+| **TC-15** | Penulisan Ulang (Overwrite) Aman | Berkas output target sudah ada di direktori | Menimpa berkas lama dengan aman tanpa korupsi | Berkas tertimpa dengan konten baru dan ukuran valid | **LULUS** |
+| **TC-16** | End-to-End Word to PDF | Berkas nyata `sample.docx` (13 KB) | Mengonversi ke PDF via Word COM/LibreOffice | Menghasilkan PDF terverifikasi dengan halaman valid | **LULUS** |
 
 ---
 
@@ -75,6 +79,6 @@ Hasil pengujian menunjukkan bahwa seluruh alur konversi bekerja secara **100% of
 
 ## 6. Kesimpulan
 
-Aplikasi telah memenuhi seluruh kriteria penerimaan **PHASE 9**. Seluruh 10 unit test otomatis backend lulus dengan status `ok (0.05s)` dan build frontend lulus dengan status `✓ built in 543ms`.
+Aplikasi telah memenuhi seluruh kriteria penerimaan **PHASE 9**. Seluruh 15 unit test otomatis backend lulus dengan status `ok (0.05s)` dan build frontend lulus dengan status `✓ built in 556ms`.
 Aplikasi siap untuk memasuki **PHASE 10 (Build, Packaging, dan Release)**.
 

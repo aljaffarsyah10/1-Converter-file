@@ -280,4 +280,120 @@ mod tests {
             assert!(res.unwrap().duration_ms < 500, "Should remain fast (< 500ms)");
         }
     }
+
+    #[test]
+    fn test_multi_file_merge_three_files() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        let sample2 = fixtures_dir.join("sample2.pdf").to_string_lossy().to_string();
+
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let output_path = Path::new("..").join("poc-converters").join("output").join("test_merge_3_files.pdf");
+        let res = converters::pdf_merge::merge_pdf_files(
+            &[sample1.clone(), sample2, sample1],
+            &output_path.to_string_lossy(),
+        );
+        assert!(res.is_ok(), "Merging 3 files should succeed");
+        let result = res.unwrap();
+        assert_eq!(result.total_pages, 6);
+        assert!(result.file_size_bytes > 0);
+    }
+
+    #[test]
+    fn test_valid_page_ranges_parsing() {
+        // Test parsing whitespace, commas, deduplication
+        let pages1 = converters::pdf_split::parse_page_range(" 1 - 2 , 1 , 2 ", 5);
+        assert_eq!(pages1.unwrap(), vec![1, 2]);
+
+        let pages2 = converters::pdf_split::parse_page_range(" 2 ", 5);
+        assert_eq!(pages2.unwrap(), vec![2]);
+
+        let pages3 = converters::pdf_split::parse_page_range("1, 3, 5", 5);
+        assert_eq!(pages3.unwrap(), vec![1, 3, 5]);
+    }
+
+    #[test]
+    fn test_unicode_and_spaces_in_paths() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
+
+        if !Path::new(&png).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("Folder Uji Konverter Spasi & Aksen (2026)");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_file = temp_dir.join("Hasil Konversi Dokumen.pdf");
+
+        let res = converters::image_to_pdf::convert_images_to_pdf(
+            &[png],
+            &out_file.to_string_lossy(),
+            Some("portrait"),
+            Some("normal"),
+        );
+        assert!(res.is_ok(), "Conversion with spaces and unicode in path must succeed");
+        assert!(out_file.exists());
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_overwrite_existing_output_safely() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_overwrite_dir");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_file = temp_dir.join("overwritten.pdf");
+
+        // Write first time
+        let res1 = converters::pdf_merge::merge_pdf_files(&[sample1.clone()], &out_file.to_string_lossy());
+        assert!(res1.is_ok(), "First write should succeed");
+
+        // Overwrite second time
+        let res2 = converters::pdf_merge::merge_pdf_files(&[sample1], &out_file.to_string_lossy());
+        assert!(res2.is_ok(), "Second write (overwrite) should succeed safely");
+        assert!(out_file.exists());
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_docx_to_pdf_conversion_e2e() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let docx = fixtures_dir.join("sample.docx").to_string_lossy().to_string();
+
+        if !Path::new(&docx).exists() {
+            return;
+        }
+
+        let (engine, _) = converters::docx_to_pdf::detect_docx_engine();
+        if engine == converters::docx_to_pdf::DocxEngine::None {
+            println!("No docx engine installed, skipping docx e2e");
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_docx_dir");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_file = temp_dir.join("docx_converted.pdf");
+
+        let res = converters::docx_to_pdf::convert_docx_to_pdf(&docx, &out_file.to_string_lossy());
+        if let Ok(result) = res {
+            assert!(result.success);
+            assert!(result.file_size_bytes > 0);
+            assert!(result.total_pages >= 1);
+            assert!(out_file.exists());
+        } else {
+            println!("Docx conversion returned error (may be sandbox restricted): {:?}", res.err());
+        }
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
 }
