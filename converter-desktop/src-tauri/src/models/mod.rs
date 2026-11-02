@@ -1,0 +1,54 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Deserialize)]
+pub struct MergePdfRequest {
+    pub input_paths: Vec<String>,
+    pub output_path: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SplitPdfRequest {
+    pub input_path: String,
+    pub output_dir: String,
+    pub output_prefix: String,
+    pub mode: String, // "extract_range" or "split_all"
+    pub page_range: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ImageToPdfRequest {
+    pub input_paths: Vec<String>,
+    pub output_path: String,
+    pub orientation: Option<String>, // "auto", "portrait", "landscape"
+    pub margin: Option<String>,      // "none", "small", "normal"
+}
+
+#[derive(Debug, Deserialize)]
+pub struct WordToPdfRequest {
+    pub input_path: String,
+    pub output_path: String,
+}
+
+#[derive(Debug, Serialize, Clone)]
+pub struct ConversionResult {
+    pub success: bool,
+    pub output_path: String,
+    pub duration_ms: u128,
+    pub file_size_bytes: u64,
+    pub total_pages: usize,
+}
+
+#[derive(Debug, Serialize, Clone)]
+pub struct ProgressEvent {
+    pub job_id: String,
+    pub percent: u32,
+    pub stage: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SystemEngineInfo {
+    pub word_com_available: bool,
+    pub libreoffice_available: bool,
+    pub libreoffice_path: Option<String>,
+}
+
