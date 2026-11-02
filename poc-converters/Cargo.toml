@@ -7,6 +7,7 @@ edition = "2021"
 lopdf = "0.35.0"
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
 flate2 = "1.0"
+docx-rs = "0.4.22"
 
 [[bin]]
 name = "poc_merge"
@@ -23,4 +24,8 @@ path = "src/bin/poc_img2pdf.rs"
 [[bin]]
 name = "poc_docx2pdf"
 path = "src/bin/poc_docx2pdf.rs"
+
+[[bin]]
+name = "poc_pdf_to_word"
+path = "src/bin/poc_pdf_to_word.rs"
 

@@ -15,6 +15,7 @@ interface ConversionOptionsPanelProps {
   onUpdateSplit: (opts: { splitMode?: "extract_range" | "split_all"; pageRange?: string; outputPrefix?: string }) => void;
   onUpdateImage: (opts: { orientation?: "auto" | "portrait" | "landscape"; pageSize?: "A4" | "FitImage"; margin?: "none" | "small" | "normal"; outputFileName?: string }) => void;
   onUpdateWord: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
+  onUpdatePdfToWord?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
 }
 
 export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
@@ -27,6 +28,7 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   onUpdateSplit,
   onUpdateImage,
   onUpdateWord,
+  onUpdatePdfToWord,
 }) => {
   return (
     <Card className="border shadow-sm">
@@ -229,6 +231,28 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
               Menjaga format teks, tabel, font, dan margin secara lokal.
+            </p>
+          </div>
+        )}
+
+        {/* 5. PDF to Word Options */}
+        {toolId === "pdf-to-word" && optionsState.type === "pdf-to-word" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Output (.docx)
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdatePdfToWord?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="document.docx"
+              />
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Mengekstrak teks & struktur dokumen PDF menjadi berkas DOCX yang dapat diedit secara 100% offline.
             </p>
           </div>
         )}

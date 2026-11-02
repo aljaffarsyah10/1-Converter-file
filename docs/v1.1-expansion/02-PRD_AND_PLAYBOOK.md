@@ -162,11 +162,11 @@ Tambahkan model request/response di `models/mod.rs`.
 - Verifikasi file DOCX output bisa dibuka di Word/LibreOffice.
 
 **Acceptance Criteria Fase 1:**
-- [ ] PoC converter PDF → DOCX berfungsi
-- [ ] Rust converter terdaftar dan 3 unit test lulus
-- [ ] Tauri command terintegrasi
-- [ ] UI tool card menunjukkan "Ready" dan workspace berfungsi
-- [ ] Fitur v1.0 tidak terpengaruh (`cargo test` semua lulus)
+- [x] PoC converter PDF → DOCX berfungsi (`poc-converters/src/bin/poc_pdf_to_word.rs`)
+- [x] Rust converter terdaftar dan 3 unit test lulus (`test_pdf_to_word_success`, `test_pdf_to_word_file_not_found`, `test_pdf_to_word_corrupted_or_empty`)
+- [x] Tauri command terintegrasi (`convert_pdf_to_word`)
+- [x] UI tool card menunjukkan "Ready" dan workspace berfungsi (`data/tools.ts`, `ConversionOptionsPanel.tsx`)
+- [x] Fitur v1.0 tidak terpengaruh (`cargo test` 18/18 test lulus)
 
 **Git checkpoint:**
 ```powershell

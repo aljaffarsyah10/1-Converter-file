@@ -12,6 +12,7 @@ import {
   StagedFile,
   SystemEngineInfo,
   WordToPdfOptions,
+  PdfToWordOptions,
 } from "@/types/conversion";
 
 interface BackendConversionResult {
@@ -397,3 +398,57 @@ export async function executeTauriWordToPdf(
   }
 }
 
+
+export async function executeTauriPdfToWord(
+  file: StagedFile,
+  options: PdfToWordOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-pdf2word-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const outFileName = options.outputFileName.endsWith(".docx")
+      ? options.outputFileName
+      : `${options.outputFileName}.docx`;
+    const outputPath = `${outDir.replace(/[/\\]$/, "")}\\${outFileName}`;
+
+    const result = await invoke<BackendConversionResult>("convert_pdf_to_word", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputPath,
+      },
+    });
+
+    if (options.openAfterConvert && isTauriEnvironment()) {
+      try {
+        await openPath(result.outputPath);
+      } catch (e) {
+        console.warn("Could not automatically open converted DOCX:", e);
+      }
+    }
+
+    return {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: result.totalPages,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+    };
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}

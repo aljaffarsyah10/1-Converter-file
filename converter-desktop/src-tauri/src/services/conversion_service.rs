@@ -1,8 +1,8 @@
-use crate::converters::{docx_to_pdf, image_to_pdf, pdf_merge, pdf_split};
+use crate::converters::{docx_to_pdf, image_to_pdf, pdf_merge, pdf_split, pdf_to_word};
 use crate::errors::AppError;
 use crate::models::{
-    ConversionResult, ImageToPdfRequest, MergePdfRequest, ProgressEvent, SplitPdfRequest,
-    WordToPdfRequest,
+    ConversionResult, ImageToPdfRequest, MergePdfRequest, PdfToWordRequest, ProgressEvent,
+    SplitPdfRequest, WordToPdfRequest,
 };
 use tauri::{AppHandle, Emitter};
 
@@ -67,6 +67,17 @@ pub fn execute_word_to_pdf(
     emit_progress(&app, &job_id, 15, "Menyiapkan engine dokumen Office...");
     let result = docx_to_pdf::convert_docx_to_pdf(&req.input_path, &req.output_path)?;
     emit_progress(&app, &job_id, 100, "Konversi DOCX ke PDF selesai");
+    Ok(result)
+}
+
+pub fn execute_pdf_to_word(
+    app: AppHandle,
+    job_id: String,
+    req: PdfToWordRequest,
+) -> Result<ConversionResult, AppError> {
+    emit_progress(&app, &job_id, 15, "Menganalisis teks & tata letak PDF...");
+    let result = pdf_to_word::convert_pdf_to_docx(&req.input_path, &req.output_path)?;
+    emit_progress(&app, &job_id, 100, "Konversi PDF ke DOCX selesai");
     Ok(result)
 }
 

@@ -11,6 +11,7 @@ import {
   executeTauriSplitPdf,
   executeTauriImageToPdf,
   executeTauriWordToPdf,
+  executeTauriPdfToWord,
   getDefaultOutputDir,
 } from "@/services/tauriConversionService";
 
@@ -38,6 +39,7 @@ interface ConversionStoreState {
   updateSplitOptions: (opts: Partial<Extract<ToolOptionsState, { type: "split-pdf" }>["options"]>) => void;
   updateImageOptions: (opts: Partial<Extract<ToolOptionsState, { type: "image-to-pdf" }>["options"]>) => void;
   updateWordOptions: (opts: Partial<Extract<ToolOptionsState, { type: "word-to-pdf" }>["options"]>) => void;
+  updatePdfToWordOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pdf-to-word" }>["options"]>) => void;
 
   startConversion: (toolId: string) => Promise<void>;
   cancelConversion: () => void;
@@ -138,6 +140,15 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           },
         };
         break;
+      case "pdf-to-word":
+        optionsState = {
+          type: "pdf-to-word",
+          options: {
+            outputFileName: "converted_document.docx",
+            openAfterConvert: true,
+          },
+        };
+        break;
       default:
         optionsState = {
           type: "merge-pdf",
@@ -194,6 +205,18 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
   updateWordOptions: (opts) => {
     set((state) => {
       if (state.optionsState.type !== "word-to-pdf") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  updatePdfToWordOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "pdf-to-word") return state;
       return {
         optionsState: {
           ...state.optionsState,
@@ -324,6 +347,21 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
                   openAfterConvert: true,
                 };
           res = await executeTauriWordToPdf(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress
+          );
+          break;
+        }
+        case "pdf-to-word": {
+          const opts =
+            optionsState.type === "pdf-to-word"
+              ? optionsState.options
+              : {
+                  outputFileName: "converted_document.docx",
+                  openAfterConvert: true,
+                };
+          res = await executeTauriPdfToWord(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
             onProgress

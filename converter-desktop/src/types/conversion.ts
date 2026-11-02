@@ -34,11 +34,18 @@ export interface WordToPdfOptions {
   openAfterConvert: boolean;
 }
 
+export interface PdfToWordOptions {
+  outputFileName: string;
+  outputDir?: string;
+  openAfterConvert: boolean;
+}
+
 export type ToolOptionsState =
   | { type: "merge-pdf"; options: MergePdfOptions }
   | { type: "split-pdf"; options: SplitPdfOptions }
   | { type: "image-to-pdf"; options: ImageToPdfOptions }
-  | { type: "word-to-pdf"; options: WordToPdfOptions };
+  | { type: "word-to-pdf"; options: WordToPdfOptions }
+  | { type: "pdf-to-word"; options: PdfToWordOptions };
 
 export type ConversionStatus =
   | "idle"

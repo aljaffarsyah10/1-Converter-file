@@ -5,7 +5,7 @@ pub mod models;
 pub mod services;
 
 use commands::convert::{
-    convert_image_to_pdf, convert_merge_pdf, convert_split_pdf, convert_word_to_pdf,
+    convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_word, convert_split_pdf, convert_word_to_pdf,
 };
 use commands::system::{get_default_output_dir, get_files_metadata, get_system_engine_info};
 
@@ -26,6 +26,7 @@ pub fn run() {
             convert_split_pdf,
             convert_image_to_pdf,
             convert_word_to_pdf,
+            convert_pdf_to_word,
             get_system_engine_info,
             get_default_output_dir,
             get_files_metadata,
@@ -393,6 +394,68 @@ mod tests {
         } else {
             println!("Docx conversion returned error (may be sandbox restricted): {:?}", res.err());
         }
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_pdf_to_word_success() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+
+        if !Path::new(&sample1).exists() {
+            println!("Fixtures not found, skipping pdf to word test");
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_pdf_to_word_success");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_file = temp_dir.join("sample1_converted.docx");
+
+        let res = converters::pdf_to_word::convert_pdf_to_docx(&sample1, &out_file.to_string_lossy());
+        assert!(res.is_ok(), "PDF to Word conversion should succeed: {:?}", res.err());
+        let result = res.unwrap();
+        assert!(result.success);
+        assert_eq!(result.total_pages, 2);
+        assert!(result.file_size_bytes > 0);
+        assert!(out_file.exists());
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_pdf_to_word_file_not_found() {
+        let fake = "C:\\path\\does_not_exist_at_all_99999.pdf";
+        let out = "C:\\path\\out.docx";
+        let res = converters::pdf_to_word::convert_pdf_to_docx(fake, out);
+        assert!(res.is_err(), "Non existent PDF must return Err");
+    }
+
+    #[test]
+    fn test_pdf_to_word_corrupted_or_empty() {
+        let temp_dir = std::env::temp_dir().join("test_pdf_to_word_corrupt");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        // 1. 0-byte file
+        let empty_pdf = temp_dir.join("empty.pdf");
+        fs::write(&empty_pdf, b"").expect("write empty");
+        let out1 = temp_dir.join("out1.docx").to_string_lossy().to_string();
+        let res1 = converters::pdf_to_word::convert_pdf_to_docx(&empty_pdf.to_string_lossy(), &out1);
+        assert!(res1.is_err(), "0-byte PDF must fail gracefully");
+
+        // 2. Non-PDF extension
+        let not_pdf = temp_dir.join("image.png");
+        fs::write(&not_pdf, b"fake png content").expect("write not_pdf");
+        let out2 = temp_dir.join("out2.docx").to_string_lossy().to_string();
+        let res2 = converters::pdf_to_word::convert_pdf_to_docx(&not_pdf.to_string_lossy(), &out2);
+        assert!(res2.is_err(), "Non-PDF file must fail format validation");
+
+        // 3. Corrupt file with .pdf extension
+        let corrupt_pdf = temp_dir.join("corrupt.pdf");
+        fs::write(&corrupt_pdf, b"GARBAGE NOT REAL PDF CONTENT 123").expect("write corrupt");
+        let out3 = temp_dir.join("out3.docx").to_string_lossy().to_string();
+        let res3 = converters::pdf_to_word::convert_pdf_to_docx(&corrupt_pdf.to_string_lossy(), &out3);
+        assert!(res3.is_err(), "Corrupt PDF must fail gracefully without panic");
 
         let _ = fs::remove_dir_all(temp_dir);
     }
