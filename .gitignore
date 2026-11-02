@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Production builds
+dist/
+dist-ssr/
+
+# Cargo build artifacts
+target/
+**/target/
+**/gen/schemas/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
