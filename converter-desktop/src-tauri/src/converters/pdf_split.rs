@@ -2,7 +2,7 @@ use crate::errors::AppError;
 use crate::models::ConversionResult;
 use lopdf::{dictionary, Document, Object};
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::time::Instant;
 
 /// Parse range string like "1-3, 5, 8-10" into sorted unique 1-based page indices

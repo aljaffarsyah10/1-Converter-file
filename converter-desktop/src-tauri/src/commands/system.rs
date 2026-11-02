@@ -11,7 +11,7 @@ pub fn get_system_engine_info() -> SystemEngineInfo {
 
 #[tauri::command]
 pub fn get_default_output_dir() -> String {
-    let mut path = if let Ok(user_profile) = std::env::var("USERPROFILE") {
+    let path = if let Ok(user_profile) = std::env::var("USERPROFILE") {
         PathBuf::from(user_profile).join("Downloads").join("Converted")
     } else {
         PathBuf::from(".").join("Converted")
