@@ -142,7 +142,15 @@ pub fn split_pdf_file(
     } else {
         // Split each page into separate files
         for p in &target_pages {
-            let page_id = *all_pages.get(p).unwrap();
+            let page_id = match all_pages.get(p) {
+                Some(id) => *id,
+                None => {
+                    return Err(AppError::InvalidPageRange(format!(
+                        "Halaman {} tidak ditemukan dalam dokumen",
+                        p
+                    )))
+                }
+            };
             let mut new_doc = Document::with_version(original.version.as_str());
             new_doc.objects = original.objects.clone();
             new_doc.max_id = new_doc.objects.keys().map(|(id, _)| *id).max().unwrap_or(0);
