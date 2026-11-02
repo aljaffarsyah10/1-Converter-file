@@ -1,12 +1,12 @@
 use crate::converters::{
     docx_to_pdf, excel_to_pdf, image_to_pdf, pdf_compress, pdf_merge, pdf_protect, pdf_rotate,
-    pdf_split, pdf_to_excel, pdf_to_image, pdf_to_word, pdf_unlock, pptx_to_pdf,
+    pdf_split, pdf_to_excel, pdf_to_image, pdf_to_word, pdf_unlock, pdf_watermark, pptx_to_pdf,
 };
 use crate::errors::AppError;
 use crate::models::{
     CompressPdfRequest, ConversionResult, ExcelToPdfRequest, ImageToPdfRequest, MergePdfRequest,
     PdfToExcelRequest, PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, ProgressEvent,
-    ProtectPdfRequest, RotatePdfRequest, SplitPdfRequest, UnlockPdfRequest, WordToPdfRequest,
+    ProtectPdfRequest, RotatePdfRequest, SplitPdfRequest, UnlockPdfRequest, WatermarkPdfRequest, WordToPdfRequest,
 };
 use tauri::{AppHandle, Emitter};
 
@@ -184,9 +184,22 @@ pub fn execute_unlock_pdf(
     emit_progress(&app, &job_id, 100, "Pembukaan proteksi PDF selesai");
     Ok(result)
 }
-
-
-
-
-
+pub fn execute_watermark_pdf(
+    app: AppHandle,
+    job_id: String,
+    req: WatermarkPdfRequest,
+) -> Result<ConversionResult, AppError> {
+    emit_progress(&app, &job_id, 20, "Menerapkan watermark pada dokumen PDF...");
+    let result = pdf_watermark::add_watermark_to_pdf(
+        &req.input_path,
+        &req.output_path,
+        &req.text,
+        req.font_size,
+        req.opacity,
+        req.position.as_deref(),
+        req.color.as_deref(),
+    )?;
+    emit_progress(&app, &job_id, 100, "Penambahan watermark selesai");
+    Ok(result)
+}
 

@@ -2,7 +2,7 @@ use crate::models::{
     CompressPdfRequest, ConversionResult, ExcelToPdfRequest, ImageToPdfRequest, MergePdfRequest,
     PdfToExcelRequest, PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, ProtectPdfRequest,
     RotatePdfRequest,
-    SplitPdfRequest, UnlockPdfRequest, WordToPdfRequest,
+    SplitPdfRequest, UnlockPdfRequest, WatermarkPdfRequest, WordToPdfRequest,
 };
 use crate::services::conversion_service;
 use tauri::AppHandle;
@@ -183,6 +183,19 @@ pub async fn convert_unlock_pdf(
 ) -> Result<ConversionResult, String> {
     tauri::async_runtime::spawn_blocking(move || {
         conversion_service::execute_unlock_pdf(app, job_id, request)
+    })
+    .await
+    .map_err(|e| format!("Task execution error: {}", e))?
+    .map_err(|e| e.to_string())
+}
+#[tauri::command]
+pub async fn convert_watermark_pdf(
+    app: AppHandle,
+    job_id: String,
+    request: WatermarkPdfRequest,
+) -> Result<ConversionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        conversion_service::execute_watermark_pdf(app, job_id, request)
     })
     .await
     .map_err(|e| format!("Task execution error: {}", e))?

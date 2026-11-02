@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToolOptionsState } from "@/types/conversion";
-import { Settings2, FolderOpen, AlertCircle, Lock, Unlock, Eye, EyeOff } from "lucide-react";
+import { Settings2, FolderOpen, AlertCircle, Lock, Unlock, Eye, EyeOff, Stamp } from "lucide-react";
 
 interface ConversionOptionsPanelProps {
   toolId: string;
@@ -67,6 +67,15 @@ interface ConversionOptionsPanelProps {
     outputFileName?: string;
     password?: string;
   }) => void;
+  onUpdateWatermark?: (opts: {
+    outputFileName?: string;
+    text?: string;
+    fontSize?: "small" | "medium" | "large";
+    opacity?: "10" | "25" | "50";
+    position?: "diagonal" | "center";
+    color?: string;
+  }) => void;
+
 
 }
 
@@ -89,6 +98,7 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   onUpdateRotate,
   onUpdateProtect,
   onUpdateUnlock,
+  onUpdateWatermark,
 }) => {
   const [showProtectPass, setShowProtectPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
@@ -657,6 +667,121 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
               Mengenkripsi berkas dengan standar keamanan 128-bit. Diperlukan kata sandi setiap kali berkas dibuka.
+            </p>
+          </div>
+        )}
+
+
+        {/* 14. Watermark PDF Options */}
+        {toolId === "watermark-pdf" && optionsState.type === "watermark-pdf" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <Stamp className="w-3.5 h-3.5 text-primary" />
+                Teks Watermark
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.text}
+                onChange={(e) => onUpdateWatermark?.({ text: e.target.value })}
+                className="text-xs h-8 font-semibold"
+                placeholder="Contoh: CONFIDENTIAL, DRAFT, SALINAN"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Posisi Tampilan
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { pos: "diagonal" as const, label: "Diagonal (45°)", desc: "Melintang Tengah" },
+                  { pos: "center" as const, label: "Horizontal", desc: "Tengah Mendatar" },
+                ].map((item) => (
+                  <Button
+                    key={item.pos}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.position === item.pos ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-10 flex flex-col items-center justify-center text-xs p-1"
+                    onClick={() => onUpdateWatermark?.({ position: item.pos })}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Ukuran Font
+              </label>
+              <div className="grid grid-cols-3 gap-1">
+                {[
+                  { size: "small" as const, label: "Kecil", desc: "36 pt" },
+                  { size: "medium" as const, label: "Sedang", desc: "54 pt" },
+                  { size: "large" as const, label: "Besar", desc: "72 pt" },
+                ].map((item) => (
+                  <Button
+                    key={item.size}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.fontSize === item.size ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-10 flex flex-col items-center justify-center text-xs p-1"
+                    onClick={() => onUpdateWatermark?.({ fontSize: item.size })}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Transparansi / Opasitas
+              </label>
+              <div className="grid grid-cols-3 gap-1">
+                {[
+                  { op: "10" as const, label: "Tipis", desc: "10%" },
+                  { op: "25" as const, label: "Standar", desc: "25%" },
+                  { op: "50" as const, label: "Tegas", desc: "50%" },
+                ].map((item) => (
+                  <Button
+                    key={item.op}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.opacity === item.op ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-10 flex flex-col items-center justify-center text-xs p-1"
+                    onClick={() => onUpdateWatermark?.({ opacity: item.op })}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Hasil (.pdf)
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdateWatermark?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="watermarked_document.pdf"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Menambahkan tanda air semi-transparan pada setiap halaman PDF tanpa merusak isi dokumen.
             </p>
           </div>
         )}

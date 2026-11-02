@@ -529,8 +529,8 @@ Panel opsi:
 - Posisi: Center / Diagonal
 
 **Acceptance Criteria Fase 9:**
-- [ ] Watermark teks muncul di output PDF
-- [ ] 3 unit test lulus
+- [x] Watermark teks muncul di output PDF
+- [x] 3 unit test lulus
 
 **Git checkpoint:**
 ```powershell

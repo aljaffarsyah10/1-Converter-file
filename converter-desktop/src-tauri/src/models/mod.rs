@@ -88,6 +88,18 @@ pub struct UnlockPdfRequest {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct WatermarkPdfRequest {
+    pub input_path: String,
+    pub output_path: String,
+    pub text: String,
+    pub font_size: Option<f64>,
+    pub opacity: Option<f64>,
+    pub position: Option<String>,
+    pub color: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct PdfToImageRequest {
     pub input_path: String,
     pub output_dir: String,

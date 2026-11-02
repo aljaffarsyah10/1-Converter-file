@@ -20,6 +20,7 @@ import {
   executeTauriProtectPdf,
   executeTauriRotatePdf,
   executeTauriUnlockPdf,
+  executeTauriWatermarkPdf,
   getDefaultOutputDir,
 } from "@/services/tauriConversionService";
 
@@ -103,6 +104,12 @@ interface ConversionStoreState {
   updateUnlockOptions: (
     opts: Partial<
       Extract<ToolOptionsState, { type: "unlock-pdf" }>["options"]
+    >,
+  ) => void;
+
+    updateWatermarkOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "watermark-pdf" }>["options"]
     >,
   ) => void;
 
@@ -293,6 +300,19 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           },
         };
         break;
+            case "watermark-pdf":
+        optionsState = {
+          type: "watermark-pdf",
+          options: {
+            outputFileName: "watermarked_document.pdf",
+            text: "CONFIDENTIAL",
+            fontSize: "medium",
+            opacity: "25",
+            position: "diagonal",
+            color: "#888888",
+          },
+        };
+        break;
       default:
         optionsState = {
           type: "merge-pdf",
@@ -467,6 +487,19 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
     });
   },
 
+  
+  updateWatermarkOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "watermark-pdf") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
   startConversion: async (toolId) => {
     const { files, optionsState, status, outputDir } = get();
 
@@ -523,6 +556,22 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
             code: "EMPTY_PASSWORD",
             message: "Kata sandi tidak boleh kosong.",
             actionableHint: "Masukkan kata sandi pembuka untuk berkas PDF.",
+          },
+        });
+        return;
+      }
+    }
+
+    
+    if (toolId === "watermark-pdf") {
+      const opts = optionsState.type === "watermark-pdf" ? optionsState.options : null;
+      if (!opts?.text || opts.text.trim().length === 0) {
+        set({
+          status: "error",
+          error: {
+            code: "EMPTY_WATERMARK_TEXT",
+            message: "Teks watermark tidak boleh kosong.",
+            actionableHint: "Masukkan teks yang ingin dijadikan watermark pada dokumen PDF.",
           },
         });
         return;
@@ -769,6 +818,24 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
                   password: "",
                 };
           res = await executeTauriUnlockPdf(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress,
+          );
+          break;
+        }
+                case "watermark-pdf": {
+          const opts =
+            optionsState.type === "watermark-pdf"
+              ? optionsState.options
+              : {
+                  outputFileName: "watermarked_document.pdf",
+                  text: "CONFIDENTIAL",
+                  fontSize: "medium" as const,
+                  opacity: "25" as const,
+                  position: "diagonal" as const,
+                };
+          res = await executeTauriWatermarkPdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
             onProgress,

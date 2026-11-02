@@ -21,6 +21,7 @@ import {
   ProtectPdfOptions,
   RotatePdfOptions,
   UnlockPdfOptions,
+  WatermarkPdfOptions,
 } from "@/types/conversion";
 
 interface BackendConversionResult {
@@ -855,6 +856,70 @@ export async function executeTauriUnlockPdf(
         inputPath: file.path,
         outputPath,
         password: options.password,
+      },
+    });
+
+    return {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: result.totalPages,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+    };
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}
+export async function executeTauriWatermarkPdf(
+  file: StagedFile,
+  options: WatermarkPdfOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-watermark-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const baseName =
+      options.outputFileName.replace(/\.pdf$/i, "") ||
+      file.name.replace(/\.pdf$/i, "") + "-watermarked";
+    const outputPath = `${outDir}\\${baseName}.pdf`;
+
+    const fontSizeMap: Record<string, number> = {
+      small: 36,
+      medium: 54,
+      large: 72,
+    };
+    const fontSize = fontSizeMap[options.fontSize] || 54;
+
+    const opacityMap: Record<string, number> = {
+      "10": 0.1,
+      "25": 0.25,
+      "50": 0.5,
+    };
+    const opacity = opacityMap[options.opacity] || 0.25;
+
+    const result = await invoke<BackendConversionResult>("convert_watermark_pdf", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputPath,
+        text: options.text,
+        fontSize,
+        opacity,
+        position: options.position,
+        color: options.color || "#888888",
       },
     });
 

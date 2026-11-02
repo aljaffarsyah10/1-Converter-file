@@ -47,6 +47,7 @@ export const ToolWorkspacePage: React.FC = () => {
     updateRotateOptions,
     updateProtectOptions,
     updateUnlockOptions,
+    updateWatermarkOptions,
     startConversion,
     cancelConversion,
     resetJob,
@@ -89,7 +90,8 @@ export const ToolWorkspacePage: React.FC = () => {
     tool.id === "pdf-to-excel" ||
     tool.id === "rotate-pdf" ||
     tool.id === "protect-pdf" ||
-    tool.id === "unlock-pdf"
+    tool.id === "unlock-pdf" ||
+    tool.id === "watermark-pdf"
       ? 1
       : undefined;
 
@@ -152,6 +154,7 @@ export const ToolWorkspacePage: React.FC = () => {
               onUpdateRotate={updateRotateOptions}
               onUpdateProtect={updateProtectOptions}
               onUpdateUnlock={updateUnlockOptions}
+              onUpdateWatermark={updateWatermarkOptions}
             />
           )}
 

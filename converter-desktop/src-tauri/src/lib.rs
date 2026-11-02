@@ -8,7 +8,7 @@ use commands::convert::{
     convert_compress_pdf, convert_excel_to_pdf, convert_image_to_pdf, convert_merge_pdf,
     convert_pdf_to_excel, convert_pdf_to_image, convert_pdf_to_word, convert_pptx_to_pdf,
     convert_protect_pdf, convert_rotate_pdf, convert_split_pdf, convert_unlock_pdf,
-    convert_word_to_pdf,
+    convert_watermark_pdf, convert_word_to_pdf,
 };
 use commands::system::{get_default_output_dir, get_files_metadata, get_system_engine_info};
 
@@ -38,6 +38,7 @@ pub fn run() {
             convert_rotate_pdf,
             convert_protect_pdf,
             convert_unlock_pdf,
+            convert_watermark_pdf,
             get_system_engine_info,
             get_default_output_dir,
             get_files_metadata,
@@ -1179,6 +1180,122 @@ mod tests {
             "anypass",
         );
         assert!(res.is_err(), "Unlocking an unencrypted PDF must fail");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_watermark_pdf_all_pages() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_watermark_all_pages");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("watermarked.pdf");
+
+        let res = converters::pdf_watermark::add_watermark_to_pdf(
+            &sample1,
+            &out_pdf.to_string_lossy(),
+            "DRAFT COPY",
+            Some(48.0),
+            Some(0.3),
+            Some("diagonal"),
+            Some("#FF0000"),
+        );
+        assert!(res.is_ok(), "Watermark should succeed: {:?}", res.err());
+
+        let doc = lopdf::Document::load(&out_pdf).expect("load watermarked");
+        let text_p1 = doc.extract_text(&[1]).unwrap();
+        assert!(text_p1.contains("DRAFT COPY"), "Page 1 must contain watermark text");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_watermark_pdf_multipage_diagonal() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_watermark_multipage");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("watermarked_multi.pdf");
+
+        let res = converters::pdf_watermark::add_watermark_to_pdf(
+            &sample1,
+            &out_pdf.to_string_lossy(),
+            "CONFIDENTIAL",
+            Some(54.0),
+            Some(0.2),
+            Some("center"),
+            Some("#555555"),
+        );
+        assert!(res.is_ok(), "Watermark should succeed on multipage PDF");
+
+        let doc = lopdf::Document::load(&out_pdf).expect("load multipage watermarked");
+        let text_p1 = doc.extract_text(&[1]).unwrap();
+        let text_p2 = doc.extract_text(&[2]).unwrap();
+        assert!(text_p1.contains("CONFIDENTIAL"), "Page 1 must have watermark");
+        assert!(text_p2.contains("CONFIDENTIAL"), "Page 2 must have watermark");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_watermark_pdf_invalid_inputs() {
+        let temp_dir = std::env::temp_dir().join("test_watermark_invalid");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        // 1. Non-existent file
+        let fake = r"C:\path\does_not_exist_xyz.pdf";
+        let out1 = temp_dir.join("out1.pdf");
+        let res_fake = converters::pdf_watermark::add_watermark_to_pdf(
+            fake,
+            &out1.to_string_lossy(),
+            "SAMPLE",
+            None,
+            None,
+            None,
+            None,
+        );
+        assert!(res_fake.is_err(), "Non existent file must fail");
+
+        // 2. 0-byte file
+        let empty_pdf = temp_dir.join("empty.pdf");
+        fs::write(&empty_pdf, b"").expect("write empty");
+        let out2 = temp_dir.join("out2.pdf");
+        let res_empty = converters::pdf_watermark::add_watermark_to_pdf(
+            &empty_pdf.to_string_lossy(),
+            &out2.to_string_lossy(),
+            "SAMPLE",
+            None,
+            None,
+            None,
+            None,
+        );
+        assert!(res_empty.is_err(), "0-byte PDF must fail");
+
+        // 3. Empty text
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if Path::new(&sample1).exists() {
+            let out3 = temp_dir.join("out3.pdf");
+            let res_empty_txt = converters::pdf_watermark::add_watermark_to_pdf(
+                &sample1,
+                &out3.to_string_lossy(),
+                "   ",
+                None,
+                None,
+                None,
+                None,
+            );
+            assert!(res_empty_txt.is_err(), "Empty watermark text must fail");
+        }
 
         let _ = fs::remove_dir_all(temp_dir);
     }

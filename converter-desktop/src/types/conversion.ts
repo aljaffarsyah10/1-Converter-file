@@ -80,6 +80,17 @@ export interface ProtectPdfOptions {
   confirmPassword?: string;
 }
 
+
+export interface WatermarkPdfOptions {
+  outputFileName: string;
+  outputDir?: string;
+  text: string;
+  fontSize: "small" | "medium" | "large";
+  opacity: "10" | "25" | "50";
+  position: "diagonal" | "center";
+  color?: string;
+}
+
 export interface UnlockPdfOptions {
   outputFileName: string;
   outputDir?: string;
@@ -106,7 +117,8 @@ export type ToolOptionsState =
   | { type: "pdf-to-excel"; options: PdfToExcelOptions }
   | { type: "rotate-pdf"; options: RotatePdfOptions }
   | { type: "protect-pdf"; options: ProtectPdfOptions }
-  | { type: "unlock-pdf"; options: UnlockPdfOptions };
+  | { type: "unlock-pdf"; options: UnlockPdfOptions }
+  | { type: "watermark-pdf"; options: WatermarkPdfOptions };
 
 export type ConversionStatus =
   | "idle"

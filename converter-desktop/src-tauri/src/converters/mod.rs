@@ -10,5 +10,6 @@ pub mod pdf_to_excel;
 pub mod pdf_to_image;
 pub mod pdf_to_word;
 pub mod pdf_unlock;
+pub mod pdf_watermark;
 pub mod pptx_to_pdf;
 
