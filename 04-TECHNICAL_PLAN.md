@@ -1,8 +1,8 @@
 # TECHNICAL_PLAN.md — File Converter Desktop Architecture & Technical Planning
 
-> **Dokumen Teknis:** `TECHNICAL_PLAN.md`  
+> **Dokumen Teknis:** `04-TECHNICAL_PLAN.md`  
 > **Status:** Finalized for Phase 3 Review  
-> **Basis Acuan:** `01-product-brief.md`, `02-FILE_CONVERTER_PRD_AND_PLAYBOOK.md`, `03-STAGE_3_TECHNICAL_PLANNING.md`  
+> **Basis Acuan:** `01-PRODUCT_BRIEF.md`, `02-PRD_AND_PLAYBOOK.md`, `03-TECHNICAL_PLANNING_GUIDE.md`  
 > **Target OS:** Windows 10/11 64-bit  
 > **Stack Utama:** Tauri 2, Rust (Backend Engine), React + TypeScript + Vite, Tailwind CSS v4, shadcn/ui, Zustand  
 > **Developer:** Solo developer (vibe coding workflow)

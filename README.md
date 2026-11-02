@@ -7,10 +7,10 @@
 **Aplikasi Desktop Offline-First untuk Konversi Dokumen & Gambar Berkecepatan Tinggi**  
 *Dibangun dengan Tauri 2 + React 19 + TypeScript + Tailwind CSS v4 + Rust*
 
-[![Release](https://img.shields.io/badge/Release-v1.0.0-blue.svg)](RELEASE_NOTES.md)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%2064--bit-0078D6.svg?logo=windows)](RELEASE_NOTES.md)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-blue.svg)](07-RELEASE_NOTES.md)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%2064--bit-0078D6.svg?logo=windows)](07-RELEASE_NOTES.md)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-15%20Passed-brightgreen.svg)](TEST_REPORT.md)
+[![Tests](https://img.shields.io/badge/Tests-15%20Passed-brightgreen.svg)](06-TEST_REPORT.md)
 [![Offline](https://img.shields.io/badge/Privacy-100%25%20Offline-emerald.svg)](README.md#prinsip-keamanan--privasi)
 
 </div>
@@ -161,12 +161,14 @@ D:\Konverter\
 │   ├── fixtures/                 # Berkas uji nyata (sample.docx, sample1.pdf, sample.png, dll)
 │   └── src/bin/                  # 4 Biner uji awal sebelum integrasi
 │
-├── 01-product-brief.md           # Product Brief Awal
-├── 02-FILE_CONVERTER_PRD_AND_PLAYBOOK.md # PRD & Panduan Eksekusi 10 Fase
-├── TECHNICAL_PLAN.md             # Rencana Teknis & Spesifikasi IPC
-├── POC_VALIDATION_REPORT.md      # Laporan Validasi 4 Mesin Konversi
-├── TEST_REPORT.md                # Laporan Pengujian 15 Skenario Uji Stabilitas
-├── RELEASE_NOTES.md              # Catatan Rilis Versi 1.0.0
+├── 01-PRODUCT_BRIEF.md           # Product Brief Awal
+├── 02-PRD_AND_PLAYBOOK.md        # PRD & Panduan Eksekusi 10 Fase
+├── 03-TECHNICAL_PLANNING_GUIDE.md # Panduan Tahap Perencanaan Teknis
+├── 04-TECHNICAL_PLAN.md          # Dokumen Arsitektur & IPC Contract
+├── 04-TECHNICAL_PLAN_SPEC.md     # Spesifikasi Teknis Mendalam
+├── 05-POC_VALIDATION_REPORT.md   # Laporan Validasi 4 Mesin Konversi
+├── 06-TEST_REPORT.md             # Laporan Pengujian 15 Skenario Uji Stabilitas
+├── 07-RELEASE_NOTES.md           # Catatan Rilis Versi 1.0.0
 └── README.md                     # Dokumentasi Utama Project Ini
 ```
 
@@ -231,7 +233,7 @@ npm run tauri build
 
 ## 📊 Hasil Pengujian & Benchmark
 
-Seluruh fitur telah diverifikasi melalui pengujian otomatis pada [`TEST_REPORT.md`](TEST_REPORT.md):
+Seluruh fitur telah diverifikasi melalui pengujian otomatis pada [`06-TEST_REPORT.md`](06-TEST_REPORT.md):
 
 | Fitur / Skenario | Waktu Rata-rata | Status |
 |---|---|:---:|
@@ -250,14 +252,17 @@ Seluruh fitur telah diverifikasi melalui pengujian otomatis pada [`TEST_REPORT.m
 
 Untuk mempelajari detail perancangan teknis dan laporan tiap tahapan, silakan baca dokumen berikut:
 
-- [`02-FILE_CONVERTER_PRD_AND_PLAYBOOK.md`](02-FILE_CONVERTER_PRD_AND_PLAYBOOK.md): Panduan utama PRD dan metodologi playbook 10 fase.
-- [`TECHNICAL_PLAN.md`](TECHNICAL_PLAN.md): Rencana arsitektur teknis, IPC contracts, dan pemilihan engine.
-- [`POC_VALIDATION_REPORT.md`](POC_VALIDATION_REPORT.md): Laporan validasi PoC konversi engine.
-- [`TEST_REPORT.md`](TEST_REPORT.md): Laporan pengujian kualitas dan keandalan 15 skenario.
-- [`RELEASE_NOTES.md`](RELEASE_NOTES.md): Catatan rilis v1.0.0 dan panduan pengguna.
+- [`01-PRODUCT_BRIEF.md`](01-PRODUCT_BRIEF.md): Visi awal produk dan batasan ruang lingkup.
+- [`02-PRD_AND_PLAYBOOK.md`](02-PRD_AND_PLAYBOOK.md): Panduan utama PRD dan metodologi playbook 10 fase.
+- [`03-TECHNICAL_PLANNING_GUIDE.md`](03-TECHNICAL_PLANNING_GUIDE.md): Pedoman teknis sebelum implementasi.
+- [`04-TECHNICAL_PLAN.md`](04-TECHNICAL_PLAN.md): Rencana arsitektur teknis, IPC contracts, dan pemilihan engine.
+- [`05-POC_VALIDATION_REPORT.md`](05-POC_VALIDATION_REPORT.md): Laporan validasi PoC konversi engine.
+- [`06-TEST_REPORT.md`](06-TEST_REPORT.md): Laporan pengujian kualitas dan keandalan 15 skenario.
+- [`07-RELEASE_NOTES.md`](07-RELEASE_NOTES.md): Catatan rilis v1.0.0 dan panduan pengguna.
 
 ---
 
 <div align="center">
   <b>File Converter Desktop</b> — 100% Offline, Cepat, dan Menghormati Privasi Anda.
 </div>
+
