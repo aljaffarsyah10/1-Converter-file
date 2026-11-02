@@ -9,3 +9,4 @@ export const useAppStore = create<AppState>((set) => ({
   currentTool: null,
   setCurrentTool: (tool) => set({ currentTool: tool }),
 }));
+
