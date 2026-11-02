@@ -40,16 +40,52 @@ interface ConversionStoreState {
   reorderFiles: (fromIndex: number, toIndex: number) => void;
   clearFiles: () => void;
   initToolOptions: (toolId: string) => void;
-  updateMergeOptions: (opts: Partial<Extract<ToolOptionsState, { type: "merge-pdf" }>["options"]>) => void;
-  updateSplitOptions: (opts: Partial<Extract<ToolOptionsState, { type: "split-pdf" }>["options"]>) => void;
-  updateImageOptions: (opts: Partial<Extract<ToolOptionsState, { type: "image-to-pdf" }>["options"]>) => void;
-  updateWordOptions: (opts: Partial<Extract<ToolOptionsState, { type: "word-to-pdf" }>["options"]>) => void;
-  updatePdfToWordOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pdf-to-word" }>["options"]>) => void;
-  updatePdfToImageOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pdf-to-image" }>["options"]>) => void;
-  updateCompressPdfOptions: (opts: Partial<Extract<ToolOptionsState, { type: "compress-pdf" }>["options"]>) => void;
-  updateExcelOptions: (opts: Partial<Extract<ToolOptionsState, { type: "excel-to-pdf" }>["options"]>) => void;
-  updatePptxOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pptx-to-pdf" }>["options"]>) => void;
-  updatePdfToExcelOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pdf-to-excel" }>["options"]>) => void;
+  updateMergeOptions: (
+    opts: Partial<Extract<ToolOptionsState, { type: "merge-pdf" }>["options"]>,
+  ) => void;
+  updateSplitOptions: (
+    opts: Partial<Extract<ToolOptionsState, { type: "split-pdf" }>["options"]>,
+  ) => void;
+  updateImageOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "image-to-pdf" }>["options"]
+    >,
+  ) => void;
+  updateWordOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "word-to-pdf" }>["options"]
+    >,
+  ) => void;
+  updatePdfToWordOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "pdf-to-word" }>["options"]
+    >,
+  ) => void;
+  updatePdfToImageOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "pdf-to-image" }>["options"]
+    >,
+  ) => void;
+  updateCompressPdfOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "compress-pdf" }>["options"]
+    >,
+  ) => void;
+  updateExcelOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "excel-to-pdf" }>["options"]
+    >,
+  ) => void;
+  updatePptxOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "pptx-to-pdf" }>["options"]
+    >,
+  ) => void;
+  updatePdfToExcelOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "pdf-to-excel" }>["options"]
+    >,
+  ) => void;
 
   startConversion: (toolId: string) => Promise<void>;
   cancelConversion: () => void;
@@ -86,7 +122,10 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
   addFiles: (newFiles) => {
     set((state) => ({
       files: [...state.files, ...newFiles],
-      status: state.status === "success" || state.status === "error" ? "idle" : state.status,
+      status:
+        state.status === "success" || state.status === "error"
+          ? "idle"
+          : state.status,
       result: null,
       error: null,
     }));
@@ -383,7 +422,8 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
         error: {
           code: "INVALID_PATH",
           message: `Berkas "${invalidFile.name}" tidak memiliki path absolut pada filesystem.`,
-          actionableHint: "Gunakan tombol 'Pilih Berkas' untuk memilih berkas dari sistem.",
+          actionableHint:
+            "Gunakan tombol 'Pilih Berkas' untuk memilih berkas dari sistem.",
         },
       });
       return;
@@ -418,7 +458,7 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           res = await executeTauriMergePdf(
             files,
             { ...opts, outputDir: outputDir || undefined },
-            onProgress
+            onProgress,
           );
           break;
         }
@@ -434,7 +474,7 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           res = await executeTauriSplitPdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
-            onProgress
+            onProgress,
           );
           break;
         }
@@ -451,7 +491,7 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           res = await executeTauriImageToPdf(
             files,
             { ...opts, outputDir: outputDir || undefined },
-            onProgress
+            onProgress,
           );
           break;
         }
@@ -466,7 +506,7 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           res = await executeTauriWordToPdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
-            onProgress
+            onProgress,
           );
           break;
         }
@@ -481,7 +521,7 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           res = await executeTauriPdfToWord(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
-            onProgress
+            onProgress,
           );
           break;
         }
@@ -498,7 +538,7 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           res = await executeTauriPdfToImage(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
-            onProgress
+            onProgress,
           );
           break;
         }
@@ -513,7 +553,7 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           res = await executeTauriCompressPdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
-            onProgress
+            onProgress,
           );
           break;
         }
@@ -528,7 +568,7 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           res = await executeTauriExcelToPdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
-            onProgress
+            onProgress,
           );
           break;
         }
@@ -543,7 +583,7 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           res = await executeTauriPptxToPdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
-            onProgress
+            onProgress,
           );
           break;
         }
@@ -558,7 +598,7 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           res = await executeTauriPdfToExcel(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
-            onProgress
+            onProgress,
           );
           break;
         }
@@ -579,7 +619,8 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
         error: {
           code: err.code || "CONVERSION_ERROR",
           message: err.message || "Gagal melakukan konversi berkas.",
-          actionableHint: err.actionableHint || "Periksa kembali berkas dan izin direktori.",
+          actionableHint:
+            err.actionableHint || "Periksa kembali berkas dan izin direktori.",
         },
       });
     }

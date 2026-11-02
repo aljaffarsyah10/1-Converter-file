@@ -12,15 +12,47 @@ interface ConversionOptionsPanelProps {
   disabled?: boolean;
   onPickOutputDir?: () => void;
   onUpdateMerge: (opts: { outputFileName: string }) => void;
-  onUpdateSplit: (opts: { splitMode?: "extract_range" | "split_all"; pageRange?: string; outputPrefix?: string }) => void;
-  onUpdateImage: (opts: { orientation?: "auto" | "portrait" | "landscape"; pageSize?: "A4" | "FitImage"; margin?: "none" | "small" | "normal"; outputFileName?: string }) => void;
-  onUpdateWord: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
-  onUpdatePdfToWord?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
-  onUpdatePdfToImage?: (opts: { format?: "png" | "jpg"; dpi?: 150 | 300; pageRange?: string; outputPrefix?: string }) => void;
-  onUpdateCompress?: (opts: { outputFileName?: string; level?: "low" | "medium" | "high" }) => void;
-  onUpdateExcel?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
-  onUpdatePptx?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
-  onUpdatePdfToExcel?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
+  onUpdateSplit: (opts: {
+    splitMode?: "extract_range" | "split_all";
+    pageRange?: string;
+    outputPrefix?: string;
+  }) => void;
+  onUpdateImage: (opts: {
+    orientation?: "auto" | "portrait" | "landscape";
+    pageSize?: "A4" | "FitImage";
+    margin?: "none" | "small" | "normal";
+    outputFileName?: string;
+  }) => void;
+  onUpdateWord: (opts: {
+    outputFileName?: string;
+    openAfterConvert?: boolean;
+  }) => void;
+  onUpdatePdfToWord?: (opts: {
+    outputFileName?: string;
+    openAfterConvert?: boolean;
+  }) => void;
+  onUpdatePdfToImage?: (opts: {
+    format?: "png" | "jpg";
+    dpi?: 150 | 300;
+    pageRange?: string;
+    outputPrefix?: string;
+  }) => void;
+  onUpdateCompress?: (opts: {
+    outputFileName?: string;
+    level?: "low" | "medium" | "high";
+  }) => void;
+  onUpdateExcel?: (opts: {
+    outputFileName?: string;
+    openAfterConvert?: boolean;
+  }) => void;
+  onUpdatePptx?: (opts: {
+    outputFileName?: string;
+    openAfterConvert?: boolean;
+  }) => void;
+  onUpdatePdfToExcel?: (opts: {
+    outputFileName?: string;
+    openAfterConvert?: boolean;
+  }) => void;
 }
 
 export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
@@ -86,13 +118,16 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <Input
                 disabled={disabled}
                 value={optionsState.options.outputFileName}
-                onChange={(e) => onUpdateMerge({ outputFileName: e.target.value })}
+                onChange={(e) =>
+                  onUpdateMerge({ outputFileName: e.target.value })
+                }
                 className="text-xs h-8 font-mono"
                 placeholder="merged_document.pdf"
               />
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Berkas-berkas PDF akan digabungkan secara berurutan sesuai daftar di sebelah kiri.
+              Berkas-berkas PDF akan digabungkan secara berurutan sesuai daftar
+              di sebelah kiri.
             </p>
           </div>
         )}
@@ -107,7 +142,11 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <div className="grid grid-cols-2 gap-1.5 p-1 bg-muted rounded-lg">
                 <Button
                   type="button"
-                  variant={optionsState.options.splitMode === "extract_range" ? "default" : "ghost"}
+                  variant={
+                    optionsState.options.splitMode === "extract_range"
+                      ? "default"
+                      : "ghost"
+                  }
                   size="sm"
                   disabled={disabled}
                   className="h-7 text-xs"
@@ -117,7 +156,11 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
                 </Button>
                 <Button
                   type="button"
-                  variant={optionsState.options.splitMode === "split_all" ? "default" : "ghost"}
+                  variant={
+                    optionsState.options.splitMode === "split_all"
+                      ? "default"
+                      : "ghost"
+                  }
                   size="sm"
                   disabled={disabled}
                   className="h-7 text-xs"
@@ -155,7 +198,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <Input
                 disabled={disabled}
                 value={optionsState.options.outputPrefix}
-                onChange={(e) => onUpdateSplit({ outputPrefix: e.target.value })}
+                onChange={(e) =>
+                  onUpdateSplit({ outputPrefix: e.target.value })
+                }
                 className="text-xs h-8 font-mono"
                 placeholder="split_document"
               />
@@ -175,7 +220,11 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
                   <Button
                     key={orient}
                     type="button"
-                    variant={optionsState.options.orientation === orient ? "default" : "ghost"}
+                    variant={
+                      optionsState.options.orientation === orient
+                        ? "default"
+                        : "ghost"
+                    }
                     size="sm"
                     disabled={disabled}
                     className="h-7 text-xs capitalize"
@@ -196,7 +245,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
                   <Button
                     key={m}
                     type="button"
-                    variant={optionsState.options.margin === m ? "default" : "ghost"}
+                    variant={
+                      optionsState.options.margin === m ? "default" : "ghost"
+                    }
                     size="sm"
                     disabled={disabled}
                     className="h-7 text-xs capitalize"
@@ -215,7 +266,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <Input
                 disabled={disabled}
                 value={optionsState.options.outputFileName}
-                onChange={(e) => onUpdateImage({ outputFileName: e.target.value })}
+                onChange={(e) =>
+                  onUpdateImage({ outputFileName: e.target.value })
+                }
                 className="text-xs h-8 font-mono"
                 placeholder="converted_images.pdf"
               />
@@ -233,7 +286,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <Input
                 disabled={disabled}
                 value={optionsState.options.outputFileName}
-                onChange={(e) => onUpdateWord({ outputFileName: e.target.value })}
+                onChange={(e) =>
+                  onUpdateWord({ outputFileName: e.target.value })
+                }
                 className="text-xs h-8 font-mono"
                 placeholder="document.pdf"
               />
@@ -255,14 +310,17 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <Input
                 disabled={disabled}
                 value={optionsState.options.outputFileName}
-                onChange={(e) => onUpdatePdfToWord?.({ outputFileName: e.target.value })}
+                onChange={(e) =>
+                  onUpdatePdfToWord?.({ outputFileName: e.target.value })
+                }
                 className="text-xs h-8 font-mono"
                 placeholder="document.docx"
               />
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
-              Mengekstrak teks & struktur dokumen PDF menjadi berkas DOCX yang dapat diedit secara 100% offline.
+              Mengekstrak teks & struktur dokumen PDF menjadi berkas DOCX yang
+              dapat diedit secara 100% offline.
             </p>
           </div>
         )}
@@ -278,7 +336,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
                   <Button
                     key={fmt}
                     type="button"
-                    variant={optionsState.options.format === fmt ? "default" : "ghost"}
+                    variant={
+                      optionsState.options.format === fmt ? "default" : "ghost"
+                    }
                     size="sm"
                     disabled={disabled}
                     className="h-7 text-xs uppercase"
@@ -302,7 +362,11 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
                   <Button
                     key={item.val}
                     type="button"
-                    variant={optionsState.options.dpi === item.val ? "default" : "ghost"}
+                    variant={
+                      optionsState.options.dpi === item.val
+                        ? "default"
+                        : "ghost"
+                    }
                     size="sm"
                     disabled={disabled}
                     className="h-7 text-xs"
@@ -321,7 +385,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <Input
                 disabled={disabled}
                 value={optionsState.options.pageRange || ""}
-                onChange={(e) => onUpdatePdfToImage?.({ pageRange: e.target.value })}
+                onChange={(e) =>
+                  onUpdatePdfToImage?.({ pageRange: e.target.value })
+                }
                 className="text-xs h-8 font-mono"
                 placeholder="Contoh: 1-3, 5 (kosongkan untuk semua)"
               />
@@ -334,7 +400,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <Input
                 disabled={disabled}
                 value={optionsState.options.outputPrefix}
-                onChange={(e) => onUpdatePdfToImage?.({ outputPrefix: e.target.value })}
+                onChange={(e) =>
+                  onUpdatePdfToImage?.({ outputPrefix: e.target.value })
+                }
                 className="text-xs h-8 font-mono"
                 placeholder="page"
               />
@@ -354,21 +422,39 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               </label>
               <div className="grid grid-cols-3 gap-1">
                 {[
-                  { level: "low" as const, label: "Rendah", desc: "Kualitas Tinggi" },
-                  { level: "medium" as const, label: "Sedang", desc: "Direkomendasikan" },
-                  { level: "high" as const, label: "Tinggi", desc: "Ukuran Minimum" },
+                  {
+                    level: "low" as const,
+                    label: "Rendah",
+                    desc: "Kualitas Tinggi",
+                  },
+                  {
+                    level: "medium" as const,
+                    label: "Sedang",
+                    desc: "Direkomendasikan",
+                  },
+                  {
+                    level: "high" as const,
+                    label: "Tinggi",
+                    desc: "Ukuran Minimum",
+                  },
                 ].map((item) => (
                   <Button
                     key={item.level}
                     type="button"
                     size="sm"
-                    variant={optionsState.options.level === item.level ? "default" : "outline"}
+                    variant={
+                      optionsState.options.level === item.level
+                        ? "default"
+                        : "outline"
+                    }
                     disabled={disabled}
                     className="h-10 flex flex-col items-center justify-center text-xs p-1"
                     onClick={() => onUpdateCompress?.({ level: item.level })}
                   >
                     <span className="font-semibold">{item.label}</span>
-                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                    <span className="text-[10px] opacity-75 font-normal">
+                      {item.desc}
+                    </span>
                   </Button>
                 ))}
               </div>
@@ -381,7 +467,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <Input
                 disabled={disabled}
                 value={optionsState.options.outputFileName}
-                onChange={(e) => onUpdateCompress?.({ outputFileName: e.target.value })}
+                onChange={(e) =>
+                  onUpdateCompress?.({ outputFileName: e.target.value })
+                }
                 className="text-xs h-8 font-mono"
                 placeholder="compressed_document.pdf"
               />
@@ -389,7 +477,8 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
 
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
-              Menghapus objek mubazir dan mengoptimalkan kompresi gambar secara lokal.
+              Menghapus objek mubazir dan mengoptimalkan kompresi gambar secara
+              lokal.
             </p>
           </div>
         )}
@@ -403,7 +492,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <Input
                 disabled={disabled}
                 value={optionsState.options.outputFileName}
-                onChange={(e) => onUpdateExcel?.({ outputFileName: e.target.value })}
+                onChange={(e) =>
+                  onUpdateExcel?.({ outputFileName: e.target.value })
+                }
                 className="text-xs h-8 font-mono"
                 placeholder="converted_spreadsheet.pdf"
               />
@@ -411,7 +502,8 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
 
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
-              Mengonversi spreadsheet XLSX, XLS, atau CSV menjadi halaman PDF secara rapi dan offline.
+              Mengonversi spreadsheet XLSX, XLS, atau CSV menjadi halaman PDF
+              secara rapi dan offline.
             </p>
           </div>
         )}
@@ -425,7 +517,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <Input
                 disabled={disabled}
                 value={optionsState.options.outputFileName}
-                onChange={(e) => onUpdatePptx?.({ outputFileName: e.target.value })}
+                onChange={(e) =>
+                  onUpdatePptx?.({ outputFileName: e.target.value })
+                }
                 className="text-xs h-8 font-mono"
                 placeholder="converted_presentation.pdf"
               />
@@ -433,7 +527,8 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
 
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
-              Mengonversi slide presentasi PPTX atau PPT menjadi halaman PDF berkualitas tinggi secara offline.
+              Mengonversi slide presentasi PPTX atau PPT menjadi halaman PDF
+              berkualitas tinggi secara offline.
             </p>
           </div>
         )}
@@ -447,7 +542,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <Input
                 disabled={disabled}
                 value={optionsState.options.outputFileName}
-                onChange={(e) => onUpdatePdfToExcel?.({ outputFileName: e.target.value })}
+                onChange={(e) =>
+                  onUpdatePdfToExcel?.({ outputFileName: e.target.value })
+                }
                 className="text-xs h-8 font-mono"
                 placeholder="extracted_tables.xlsx"
               />
@@ -455,7 +552,8 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
 
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
-              Mengekstrak baris & tabel data dari dokumen PDF ke dalam spreadsheet Excel secara 100% offline.
+              Mengekstrak baris & tabel data dari dokumen PDF ke dalam
+              spreadsheet Excel secara 100% offline.
             </p>
           </div>
         )}
@@ -463,4 +561,3 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
     </Card>
   );
 };
-

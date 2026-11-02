@@ -76,7 +76,16 @@ export const ToolWorkspacePage: React.FC = () => {
   const isProcessing = status === "processing" || status === "validating";
   const canReorder = tool.id === "merge-pdf" || tool.id === "image-to-pdf";
   const maxFiles =
-    tool.id === "split-pdf" || tool.id === "word-to-pdf" || tool.id === "pdf-to-word" || tool.id === "pdf-to-image" || tool.id === "compress-pdf" || tool.id === "excel-to-pdf" || tool.id === "pptx-to-pdf" || tool.id === "pdf-to-excel" ? 1 : undefined;
+    tool.id === "split-pdf" ||
+    tool.id === "word-to-pdf" ||
+    tool.id === "pdf-to-word" ||
+    tool.id === "pdf-to-image" ||
+    tool.id === "compress-pdf" ||
+    tool.id === "excel-to-pdf" ||
+    tool.id === "pptx-to-pdf" ||
+    tool.id === "pdf-to-excel"
+      ? 1
+      : undefined;
 
   return (
     <PageContainer>
