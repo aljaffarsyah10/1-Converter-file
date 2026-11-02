@@ -61,6 +61,15 @@ pub fn convert_images_to_pdf(
             _ => (base_pt_w + margin_pts * 2.0, base_pt_h + margin_pts * 2.0),
         };
 
+        // Proportional scaling and centering
+        let printable_w = (page_w - margin_pts * 2.0).max(1.0);
+        let printable_h = (page_h - margin_pts * 2.0).max(1.0);
+        let scale = (printable_w / base_pt_w).min(printable_h / base_pt_h);
+        let render_w = base_pt_w * scale;
+        let render_h = base_pt_h * scale;
+        let offset_x = margin_pts + (printable_w - render_w) / 2.0;
+        let offset_y = margin_pts + (printable_h - render_h) / 2.0;
+
         let is_jpeg = img_path.to_lowercase().ends_with(".jpg") || img_path.to_lowercase().ends_with(".jpeg");
 
         let (img_stream_data, filter) = if is_jpeg {
@@ -98,12 +107,12 @@ pub fn convert_images_to_pdf(
                 Operation::new(
                     "cm",
                     vec![
-                        Object::Real(base_pt_w as f32),
+                        Object::Real(render_w as f32),
                         Object::Real(0.0),
                         Object::Real(0.0),
-                        Object::Real(base_pt_h as f32),
-                        Object::Real(margin_pts as f32),
-                        Object::Real(margin_pts as f32),
+                        Object::Real(render_h as f32),
+                        Object::Real(offset_x as f32),
+                        Object::Real(offset_y as f32),
                     ],
                 ),
                 Operation::new("Do", vec![Object::Name(img_name.as_bytes().to_vec())]),

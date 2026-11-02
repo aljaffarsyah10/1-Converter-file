@@ -115,6 +115,14 @@ pub fn convert_docx_to_pdf(input_path: &str, output_path: &str) -> Result<Conver
             if !status.success() {
                 return Err(AppError::ExecutionError("LibreOffice selesai dengan kode error".into()));
             }
+
+            // LibreOffice saves to <stem>.pdf in clean_out_dir; rename to clean_out if user specified custom name
+            let lo_default_out = PathBuf::from(&clean_out_dir)
+                .join(in_file.file_stem().unwrap_or_default())
+                .with_extension("pdf");
+            if lo_default_out.exists() && lo_default_out != PathBuf::from(&clean_out) {
+                let _ = fs::rename(&lo_default_out, &clean_out);
+            }
         }
         DocxEngine::WindowsWordCom => {
             let script = format!(

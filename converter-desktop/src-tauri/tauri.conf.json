@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "converter-desktop",
+  "productName": "File Converter Desktop",
   "version": "0.1.0",
   "identifier": "com.fileconverter.desktop",
   "build": {
@@ -12,9 +12,12 @@
   "app": {
     "windows": [
       {
-        "title": "converter-desktop",
-        "width": 800,
-        "height": 600
+        "title": "File Converter Desktop",
+        "width": 1024,
+        "height": 720,
+        "minWidth": 800,
+        "minHeight": 600,
+        "center": true
       }
     ],
     "security": {
