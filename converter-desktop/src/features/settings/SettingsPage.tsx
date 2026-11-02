@@ -233,7 +233,7 @@ export const SettingsPage: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent className="px-4 py-2 text-[11px] text-muted-foreground space-y-1 font-mono">
-            <div>Versi: 0.1.0-mvp (Tauri 2 + React + Rust)</div>
+            <div>Versi: 1.0.0 (Tauri 2 + React + Rust)</div>
             <div>Platform: Windows 10/11 64-bit</div>
             <div>Arsitektur: Offline-First Desktop</div>
           </CardContent>
