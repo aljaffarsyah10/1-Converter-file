@@ -13,3 +13,4 @@ export interface ToolItem {
   acceptedFormats: string[];
   outputFormat: string;
 }
+

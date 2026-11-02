@@ -90,3 +90,4 @@ export const TOOLS_CATALOG: ToolItem[] = [
     outputFormat: "PDF",
   },
 ];
+
