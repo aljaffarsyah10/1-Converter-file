@@ -111,6 +111,15 @@ export interface ConvertImageOptions {
   targetFormat: "png" | "jpg" | "webp" | "bmp";
 }
 
+
+export interface HtmlToPdfOptions {
+  outputFileName: string;
+  outputDir?: string;
+  pageSize: "A4" | "Letter";
+  margin: "none" | "small" | "normal";
+  orientation: "portrait" | "landscape";
+}
+
 export interface ResizeImageOptions {
   outputFileName: string;
   outputDir?: string;
@@ -145,7 +154,8 @@ export type ToolOptionsState =
   | { type: "watermark-pdf"; options: WatermarkPdfOptions }
   | { type: "image-compress"; options: CompressImageOptions }
   | { type: "image-convert"; options: ConvertImageOptions }
-  | { type: "image-resize"; options: ResizeImageOptions };
+  | { type: "image-resize"; options: ResizeImageOptions }
+  | { type: "html-to-pdf"; options: HtmlToPdfOptions };
 
 export type ConversionStatus =
   | "idle"

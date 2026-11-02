@@ -619,8 +619,8 @@ Buat `converters/html_to_pdf.rs`:
 Panel opsi: ukuran kertas (A4/Letter), margin, orientasi (portrait/landscape).
 
 **Acceptance Criteria Fase 11:**
-- [ ] HTML dengan CSS → PDF yang rapi
-- [ ] 3 unit test lulus
+- [x] HTML dengan CSS → PDF yang rapi
+- [x] 3 unit test lulus
 
 **Git checkpoint:**
 ```powershell

@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToolOptionsState } from "@/types/conversion";
-import { Settings2, FolderOpen, AlertCircle, Lock, Unlock, Eye, EyeOff, Stamp, ImageDown, RefreshCw, Scaling } from "lucide-react";
+import { Settings2, FolderOpen, AlertCircle, Lock, Unlock, Eye, EyeOff, Stamp, ImageDown, RefreshCw, Scaling, Code } from "lucide-react";
 
 interface ConversionOptionsPanelProps {
   toolId: string;
@@ -92,6 +92,13 @@ interface ConversionOptionsPanelProps {
     scalePercent?: number;
     maintainAspectRatio?: boolean;
   }) => void;
+  onUpdateHtmlToPdf?: (opts: {
+    outputFileName?: string;
+    pageSize?: "A4" | "Letter";
+    margin?: "none" | "small" | "normal";
+    orientation?: "portrait" | "landscape";
+  }) => void;
+
 
 
 
@@ -120,6 +127,7 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   onUpdateCompressImage,
   onUpdateConvertImage,
   onUpdateResizeImage,
+  onUpdateHtmlToPdf,
 }) => {
   const [showProtectPass, setShowProtectPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
@@ -785,6 +793,106 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
               Mengonversi berkas gambar antar format modern (PNG, JPG, WebP, BMP) secara langsung.
+            </p>
+          </div>
+        )}
+
+
+        {/* 18. HTML to PDF Options */}
+        {toolId === "html-to-pdf" && optionsState.type === "html-to-pdf" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <Code className="w-3.5 h-3.5 text-primary" />
+                Ukuran Kertas
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { size: "A4" as const, label: "A4", desc: "210 × 297 mm" },
+                  { size: "Letter" as const, label: "US Letter", desc: "8.5 × 11 in" },
+                ].map((item) => (
+                  <Button
+                    key={item.size}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.pageSize === item.size ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-10 flex flex-col items-center justify-center text-xs p-1"
+                    onClick={() => onUpdateHtmlToPdf?.({ pageSize: item.size })}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Orientasi Halaman
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { ori: "portrait" as const, label: "Tegak (Portrait)" },
+                  { ori: "landscape" as const, label: "Mendatar (Landscape)" },
+                ].map((item) => (
+                  <Button
+                    key={item.ori}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.orientation === item.ori ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-8 text-xs font-semibold"
+                    onClick={() => onUpdateHtmlToPdf?.({ orientation: item.ori })}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Batas Tepi (Margin)
+              </label>
+              <div className="grid grid-cols-3 gap-1">
+                {[
+                  { m: "normal" as const, label: "Standar", desc: "15 mm" },
+                  { m: "small" as const, label: "Sempit", desc: "8 mm" },
+                  { m: "none" as const, label: "Tanpa Margin", desc: "0 mm" },
+                ].map((item) => (
+                  <Button
+                    key={item.m}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.margin === item.m ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-10 flex flex-col items-center justify-center text-xs p-1"
+                    onClick={() => onUpdateHtmlToPdf?.({ margin: item.m })}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Hasil (.pdf)
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdateHtmlToPdf?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="rendered_document.pdf"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Merender halaman HTML dan styling CSS secara offline dengan engine browser bawaan Windows.
             </p>
           </div>
         )}

@@ -25,6 +25,7 @@ import {
   CompressImageOptions,
   ConvertImageOptions,
   ResizeImageOptions,
+  HtmlToPdfOptions,
 } from "@/types/conversion";
 
 interface BackendConversionResult {
@@ -1082,6 +1083,54 @@ export async function executeTauriResizeImage(
       outputSizeFormatted: formatBytes(result.fileSizeBytes),
       durationMs: Number(result.durationMs),
       totalPages: 1,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+    };
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}
+export async function executeTauriHtmlToPdf(
+  file: StagedFile,
+  options: HtmlToPdfOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-html-pdf-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const baseName =
+      options.outputFileName.replace(/\.pdf$/i, "") ||
+      file.name.replace(/\.[^/.]+$/, "") + "-rendered";
+    const outputPath = `${outDir}\\${baseName}.pdf`;
+
+    const result = await invoke<BackendConversionResult>("convert_html_to_pdf", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputPath,
+        pageSize: options.pageSize,
+        margin: options.margin,
+        orientation: options.orientation,
+      },
+    });
+
+    return {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: result.totalPages,
       createdAt: new Date().toLocaleTimeString("id-ID"),
     };
   } catch (err) {

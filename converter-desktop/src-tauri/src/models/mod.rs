@@ -128,6 +128,16 @@ pub struct ResizeImageRequest {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct HtmlToPdfRequest {
+    pub input_path: String,
+    pub output_path: String,
+    pub page_size: Option<String>,
+    pub margin: Option<String>,
+    pub orientation: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct PdfToImageRequest {
     pub input_path: String,
     pub output_dir: String,

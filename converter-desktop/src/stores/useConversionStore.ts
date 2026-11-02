@@ -24,6 +24,7 @@ import {
   executeTauriCompressImage,
   executeTauriConvertImage,
   executeTauriResizeImage,
+  executeTauriHtmlToPdf,
   getDefaultOutputDir,
 } from "@/services/tauriConversionService";
 
@@ -129,6 +130,12 @@ interface ConversionStoreState {
   updateResizeImageOptions: (
     opts: Partial<
       Extract<ToolOptionsState, { type: "image-resize" }>["options"]
+    >,
+  ) => void;
+
+    updateHtmlToPdfOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "html-to-pdf" }>["options"]
     >,
   ) => void;
 
@@ -361,6 +368,17 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           },
         };
         break;
+            case "html-to-pdf":
+        optionsState = {
+          type: "html-to-pdf",
+          options: {
+            outputFileName: "rendered_document.pdf",
+            pageSize: "A4",
+            margin: "normal",
+            orientation: "portrait",
+          },
+        };
+        break;
       default:
         optionsState = {
           type: "merge-pdf",
@@ -576,6 +594,19 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
   updateResizeImageOptions: (opts) => {
     set((state) => {
       if (state.optionsState.type !== "image-resize") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  
+  updateHtmlToPdfOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "html-to-pdf") return state;
       return {
         optionsState: {
           ...state.optionsState,
@@ -968,6 +999,23 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
                   maintainAspectRatio: true,
                 };
           res = await executeTauriResizeImage(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress,
+          );
+          break;
+        }
+                case "html-to-pdf": {
+          const opts =
+            optionsState.type === "html-to-pdf"
+              ? optionsState.options
+              : {
+                  outputFileName: "rendered_document.pdf",
+                  pageSize: "A4" as const,
+                  margin: "normal" as const,
+                  orientation: "portrait" as const,
+                };
+          res = await executeTauriHtmlToPdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
             onProgress,

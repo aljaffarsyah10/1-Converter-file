@@ -6,10 +6,10 @@ pub mod services;
 
 use commands::convert::{
     convert_compress_image, convert_compress_pdf, convert_convert_image, convert_excel_to_pdf,
-    convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_excel, convert_pdf_to_image,
-    convert_pdf_to_word, convert_pptx_to_pdf, convert_protect_pdf, convert_resize_image,
-    convert_rotate_pdf, convert_split_pdf, convert_unlock_pdf, convert_watermark_pdf,
-    convert_word_to_pdf,
+    convert_html_to_pdf, convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_excel,
+    convert_pdf_to_image, convert_pdf_to_word, convert_pptx_to_pdf, convert_protect_pdf,
+    convert_resize_image, convert_rotate_pdf, convert_split_pdf, convert_unlock_pdf,
+    convert_watermark_pdf, convert_word_to_pdf,
 };
 use commands::system::{get_default_output_dir, get_files_metadata, get_system_engine_info};
 
@@ -43,6 +43,7 @@ pub fn run() {
             convert_compress_image,
             convert_convert_image,
             convert_resize_image,
+            convert_html_to_pdf,
             get_system_engine_info,
             get_default_output_dir,
             get_files_metadata,
@@ -1556,6 +1557,110 @@ mod tests {
             None,
         );
         assert!(res_fake.is_err(), "Non existent file must fail");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    // === FASE 11: HTML to PDF Tests ===
+
+    #[test]
+    fn test_html_to_pdf_conversion_success() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_html = fixtures_dir.join("sample.html").to_string_lossy().to_string();
+        if !Path::new(&sample_html).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_html_to_pdf_success");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("output.pdf");
+
+        let res = converters::html_to_pdf::convert_html_to_pdf(
+            &sample_html,
+            &out_pdf.to_string_lossy(),
+            None,
+            None,
+            None,
+        );
+        assert!(res.is_ok(), "HTML to PDF should succeed: {:?}", res.err());
+        assert!(out_pdf.exists());
+
+        let doc = lopdf::Document::load(&out_pdf).expect("load output PDF with lopdf");
+        let text = doc.extract_text(&[1]).unwrap();
+        assert!(text.contains("Laporan Konversi Dokumen"));
+        assert!(text.contains("HTML to PDF"));
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_html_to_pdf_options_landscape() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_html = fixtures_dir.join("sample.html").to_string_lossy().to_string();
+        if !Path::new(&sample_html).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_html_to_pdf_landscape");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("output_landscape.pdf");
+
+        let res = converters::html_to_pdf::convert_html_to_pdf(
+            &sample_html,
+            &out_pdf.to_string_lossy(),
+            Some("letter"),
+            Some("small"),
+            Some("landscape"),
+        );
+        assert!(res.is_ok(), "Landscape HTML to PDF should succeed: {:?}", res.err());
+        assert!(out_pdf.exists());
+
+        let doc = lopdf::Document::load(&out_pdf).expect("load landscape PDF");
+        assert!(doc.get_pages().len() >= 1);
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_html_to_pdf_invalid_inputs() {
+        let temp_dir = std::env::temp_dir().join("test_html_to_pdf_invalid");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("out.pdf");
+
+        // 1. Non-existent file
+        let fake = r"C:\path\does_not_exist_xyz.html";
+        let res_fake = converters::html_to_pdf::convert_html_to_pdf(
+            fake,
+            &out_pdf.to_string_lossy(),
+            None,
+            None,
+            None,
+        );
+        assert!(res_fake.is_err(), "Non-existent HTML file must fail");
+
+        // 2. 0-byte file
+        let empty_html = temp_dir.join("empty.html");
+        fs::write(&empty_html, b"").expect("write empty");
+        let res_empty = converters::html_to_pdf::convert_html_to_pdf(
+            &empty_html.to_string_lossy(),
+            &out_pdf.to_string_lossy(),
+            None,
+            None,
+            None,
+        );
+        assert!(res_empty.is_err(), "0-byte HTML file must fail");
+
+        // 3. Wrong extension
+        let dummy_txt = temp_dir.join("dummy.txt");
+        fs::write(&dummy_txt, b"Hello").expect("write txt");
+        let res_txt = converters::html_to_pdf::convert_html_to_pdf(
+            &dummy_txt.to_string_lossy(),
+            &out_pdf.to_string_lossy(),
+            None,
+            None,
+            None,
+        );
+        assert!(res_txt.is_err(), "Non-HTML file must fail");
 
         let _ = fs::remove_dir_all(temp_dir);
     }
