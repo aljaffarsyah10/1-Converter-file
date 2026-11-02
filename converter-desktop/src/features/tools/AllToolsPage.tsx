@@ -13,6 +13,7 @@ const CATEGORIES: Array<"All" | ToolCategory> = [
   "PDF Tools",
   "Document",
   "Image",
+  "Archive",
 ];
 
 export const AllToolsPage: React.FC = () => {

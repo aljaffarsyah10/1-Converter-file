@@ -14,6 +14,17 @@ import {
   Minimize2,
   ArrowRight,
   Lock,
+  Presentation,
+  Table,
+  RotateCw,
+  ShieldCheck,
+  Unlock,
+  Stamp,
+  ImageDown,
+  ImagePlus,
+  Scaling,
+  Code,
+  FileCode,
 } from "lucide-react";
 
 interface ToolCardProps {
@@ -42,6 +53,28 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
         return <Sheet {...props} />;
       case "Minimize2":
         return <Minimize2 {...props} />;
+      case "Presentation":
+        return <Presentation {...props} />;
+      case "Table":
+        return <Table {...props} />;
+      case "RotateCw":
+        return <RotateCw {...props} />;
+      case "ShieldCheck":
+        return <ShieldCheck {...props} />;
+      case "Unlock":
+        return <Unlock {...props} />;
+      case "Stamp":
+        return <Stamp {...props} />;
+      case "ImageDown":
+        return <ImageDown {...props} />;
+      case "ImagePlus":
+        return <ImagePlus {...props} />;
+      case "Scaling":
+        return <Scaling {...props} />;
+      case "Code":
+        return <Code {...props} />;
+      case "FileCode":
+        return <FileCode {...props} />;
       default:
         return <FileText {...props} />;
     }
@@ -73,7 +106,11 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
             }`}
           >
             {!tool.isAvailable && <Lock className="w-3 h-3" />}
-            {tool.priority === "P0" ? "Ready" : tool.priority}
+            {tool.priority === "P0"
+              ? "Ready"
+              : tool.priority === "P1"
+                ? "Coming Soon"
+                : "Planned"}
           </span>
         </div>
         <CardTitle className="text-base font-semibold group-hover:text-primary transition-colors">
