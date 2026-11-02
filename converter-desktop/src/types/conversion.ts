@@ -3,19 +3,21 @@ export interface StagedFile {
   name: string;
   size: number; // in bytes
   sizeFormatted: string;
-  path?: string;
+  path: string; // real absolute path on disk
   format: string;
   lastModified?: number;
 }
 
 export interface MergePdfOptions {
   outputFileName: string;
+  outputDir?: string;
 }
 
 export interface SplitPdfOptions {
   splitMode: "extract_range" | "split_all";
   pageRange: string; // e.g. "1-3, 5, 8-10"
   outputPrefix: string;
+  outputDir?: string;
 }
 
 export interface ImageToPdfOptions {
@@ -23,10 +25,12 @@ export interface ImageToPdfOptions {
   pageSize: "A4" | "FitImage";
   margin: "none" | "small" | "normal";
   outputFileName: string;
+  outputDir?: string;
 }
 
 export interface WordToPdfOptions {
   outputFileName: string;
+  outputDir?: string;
   openAfterConvert: boolean;
 }
 
@@ -43,7 +47,7 @@ export type ConversionStatus =
   | "success"
   | "error";
 
-export interface MockConversionResult {
+export interface ConversionResult {
   outputPath: string;
   outputFileName: string;
   outputSizeFormatted: string;
@@ -52,9 +56,30 @@ export interface MockConversionResult {
   createdAt: string;
 }
 
+// Backward compatibility alias
+export type MockConversionResult = ConversionResult;
+
 export interface ConversionError {
   code: string;
   message: string;
   actionableHint?: string;
+}
+
+export interface SystemEngineInfo {
+  word_com_available: boolean;
+  libreoffice_available: boolean;
+  libreoffice_path?: string | null;
+}
+
+export interface ProgressEventPayload {
+  job_id: string;
+  percent: number;
+  stage: string;
+}
+
+export interface ProgressEventPayload {
+  job_id: string;
+  percent: number;
+  stage: string;
 }
 

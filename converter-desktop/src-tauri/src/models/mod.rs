@@ -1,12 +1,14 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct MergePdfRequest {
     pub input_paths: Vec<String>,
     pub output_path: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct SplitPdfRequest {
     pub input_path: String,
     pub output_dir: String,
@@ -15,7 +17,8 @@ pub struct SplitPdfRequest {
     pub page_range: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct ImageToPdfRequest {
     pub input_paths: Vec<String>,
     pub output_path: String,
@@ -23,13 +26,15 @@ pub struct ImageToPdfRequest {
     pub margin: Option<String>,      // "none", "small", "normal"
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct WordToPdfRequest {
     pub input_path: String,
     pub output_path: String,
 }
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct ConversionResult {
     pub success: bool,
     pub output_path: String,
@@ -38,17 +43,30 @@ pub struct ConversionResult {
     pub total_pages: usize,
 }
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct ProgressEvent {
     pub job_id: String,
     pub percent: u32,
     pub stage: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct SystemEngineInfo {
     pub word_com_available: bool,
     pub libreoffice_available: bool,
     pub libreoffice_path: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct FileMetadata {
+    pub id: String,
+    pub name: String,
+    pub path: String,
+    pub size: u64,
+    pub size_formatted: String,
+    pub format: String,
+    pub last_modified: u64,
+}

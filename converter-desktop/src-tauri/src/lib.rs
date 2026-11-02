@@ -7,7 +7,7 @@ pub mod services;
 use commands::convert::{
     convert_image_to_pdf, convert_merge_pdf, convert_split_pdf, convert_word_to_pdf,
 };
-use commands::system::{get_default_output_dir, get_system_engine_info};
+use commands::system::{get_default_output_dir, get_files_metadata, get_system_engine_info};
 
 // Keep greet for backwards compatibility if needed
 #[tauri::command]
@@ -19,6 +19,7 @@ fn greet(name: &str) -> String {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             greet,
             convert_merge_pdf,
@@ -27,6 +28,7 @@ pub fn run() {
             convert_word_to_pdf,
             get_system_engine_info,
             get_default_output_dir,
+            get_files_metadata,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

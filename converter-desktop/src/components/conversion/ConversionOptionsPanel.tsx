@@ -4,13 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToolOptionsState } from "@/types/conversion";
 import { Settings2, FolderOpen, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
 
 interface ConversionOptionsPanelProps {
   toolId: string;
   optionsState: ToolOptionsState;
   defaultOutputPath: string;
   disabled?: boolean;
+  onPickOutputDir?: () => void;
   onUpdateMerge: (opts: { outputFileName: string }) => void;
   onUpdateSplit: (opts: { splitMode?: "extract_range" | "split_all"; pageRange?: string; outputPrefix?: string }) => void;
   onUpdateImage: (opts: { orientation?: "auto" | "portrait" | "landscape"; pageSize?: "A4" | "FitImage"; margin?: "none" | "small" | "normal"; outputFileName?: string }) => void;
@@ -22,6 +22,7 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   optionsState,
   defaultOutputPath,
   disabled = false,
+  onPickOutputDir,
   onUpdateMerge,
   onUpdateSplit,
   onUpdateImage,
@@ -56,7 +57,7 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               disabled={disabled}
               className="h-8 w-8 shrink-0"
               title="Ganti folder output"
-              onClick={() => toast.info("Native Folder Picker terhubung pada Phase 8")}
+              onClick={onPickOutputDir}
             >
               <FolderOpen className="w-3.5 h-3.5" />
             </Button>

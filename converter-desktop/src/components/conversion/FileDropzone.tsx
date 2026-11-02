@@ -1,8 +1,14 @@
-import React, { useRef, useState } from "react";
-import { UploadCloud, AlertCircle } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StagedFile } from "@/types/conversion";
 import { toast } from "sonner";
+import {
+  getFilesMetadata,
+  isTauriEnvironment,
+  pickFiles,
+} from "@/services/tauriConversionService";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 
 interface FileDropzoneProps {
   acceptedFormats: string[];
@@ -28,6 +34,20 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
   };
 
+  const deliverValidFiles = (files: StagedFile[]) => {
+    if (files.length === 0) return;
+
+    if (maxFiles && files.length > maxFiles) {
+      toast.warning(`Maksimal ${maxFiles} berkas`, {
+        description: `Hanya ${maxFiles} berkas pertama yang akan digunakan.`,
+      });
+      onFilesAccepted(files.slice(0, maxFiles));
+    } else {
+      onFilesAccepted(files);
+      toast.success(`${files.length} berkas berhasil ditambahkan`);
+    }
+  };
+
   const processFileList = (fileList: FileList | File[]) => {
     const rawFiles = Array.from(fileList);
     const validFiles: StagedFile[] = [];
@@ -40,9 +60,12 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
       );
 
       if (isAccepted) {
+        // In browser fallback, path might be empty, but we fill what's available
+        const fileWithPath = file as File & { path?: string };
         validFiles.push({
           id: `${file.name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
           name: file.name,
+          path: fileWithPath.path || "",
           size: file.size,
           sizeFormatted: formatFileSize(file.size),
           format: extension.replace(".", "").toUpperCase(),
@@ -59,18 +82,72 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
       });
     }
 
-    if (validFiles.length > 0) {
-      if (maxFiles && validFiles.length > maxFiles) {
-        toast.warning(`Maksimal ${maxFiles} berkas`, {
-          description: `Hanya ${maxFiles} berkas pertama yang akan digunakan.`,
+    deliverValidFiles(validFiles);
+  };
+
+  const handleSelectFiles = async () => {
+    if (disabled) return;
+
+    if (isTauriEnvironment()) {
+      try {
+        const files = await pickFiles(acceptedFormats, maxFiles !== 1);
+        if (files.length > 0) {
+          deliverValidFiles(files);
+        }
+      } catch (err: any) {
+        console.error("File dialog error:", err);
+        toast.error("Gagal membuka pemilih berkas desktop", {
+          description: err?.message || String(err),
         });
-        onFilesAccepted(validFiles.slice(0, maxFiles));
-      } else {
-        onFilesAccepted(validFiles);
-        toast.success(`${validFiles.length} berkas berhasil ditambahkan`);
       }
+    } else {
+      fileInputRef.current?.click();
     }
   };
+
+  // Listen to Tauri native window drag-drop events
+  useEffect(() => {
+    if (!isTauriEnvironment() || disabled) return;
+
+    let unlisten: (() => void) | undefined;
+
+    getCurrentWebview()
+      .onDragDropEvent(async (event) => {
+        if (event.payload.type === "over" || event.payload.type === "enter") {
+          setIsDragOver(true);
+        } else if (event.payload.type === "leave") {
+          setIsDragOver(false);
+        } else if (event.payload.type === "drop") {
+          setIsDragOver(false);
+          const droppedPaths = event.payload.paths;
+          if (droppedPaths && droppedPaths.length > 0) {
+            const files = await getFilesMetadata(droppedPaths);
+            const validFiles = files.filter((f) => {
+              const ext = `.${f.name.split(".").pop()?.toLowerCase() || ""}`;
+              return acceptedFormats.some((fmt) => fmt.toLowerCase() === ext);
+            });
+
+            if (validFiles.length < files.length) {
+              toast.error("Format berkas ditolak", {
+                description: `Beberapa berkas yang dijatuhkan bukan format yang didukung (${acceptedFormats.join(", ")}).`,
+              });
+            }
+
+            deliverValidFiles(validFiles);
+          }
+        }
+      })
+      .then((fn) => {
+        unlisten = fn;
+      })
+      .catch((err) => {
+        console.warn("Could not register window drag-drop listener:", err);
+      });
+
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, [acceptedFormats, disabled, maxFiles]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -97,7 +174,6 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
     if (e.target.files && e.target.files.length > 0) {
       processFileList(e.target.files);
     }
-    // Reset input value so re-selecting same file works
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -113,7 +189,7 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
           ? "border-primary bg-primary/5 scale-[0.99]"
           : "border-border bg-card hover:border-primary/40 hover:bg-muted/10"
       } ${disabled ? "opacity-50 pointer-events-none" : "cursor-pointer"}`}
-      onClick={() => fileInputRef.current?.click()}
+      onClick={handleSelectFiles}
     >
       <input
         ref={fileInputRef}
@@ -139,55 +215,27 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
             key={fmt}
             className="text-[11px] font-mono px-2 py-0.5 rounded bg-secondary text-secondary-foreground"
           >
-            {fmt}
+            {fmt.toUpperCase()}
           </span>
         ))}
       </div>
 
-      <div className="mt-4 flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          type="button"
-          className="text-xs"
-          onClick={(e) => {
-            e.stopPropagation();
-            fileInputRef.current?.click();
-          }}
-        >
-          Pilih Berkas
-        </Button>
-
-        {/* Demo Button to add synthetic valid file for testing */}
-        <Button
-          variant="ghost"
-          size="sm"
-          type="button"
-          className="text-xs text-muted-foreground"
-          onClick={(e) => {
-            e.stopPropagation();
-            const format = acceptedFormats[0];
-            const sample: StagedFile = {
-              id: `sample-${Date.now()}`,
-              name: `contoh_dokumen_${Date.now().toString().slice(-4)}${format}`,
-              size: 1024 * 750, // 750 KB
-              sizeFormatted: "750 KB",
-              format: format.replace(".", "").toUpperCase(),
-              lastModified: Date.now(),
-            };
-            onFilesAccepted([sample]);
-            toast.info("Sampel berkas simulasi ditambahkan");
-          }}
-        >
-          + Tambah Sampel Uji
-        </Button>
-      </div>
-
-      <p className="text-[11px] text-muted-foreground mt-3 flex items-center gap-1">
-        <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
-        Pemrosesan 100% lokal di perangkat Anda. Berkas asli tidak diubah.
+      <p className="text-xs text-muted-foreground mt-3">
+        Pemrosesan 100% lokal di komputer Anda • Berkas asli tetap aman
       </p>
+
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={disabled}
+        className="mt-4 text-xs"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleSelectFiles();
+        }}
+      >
+        Pilih Berkas Desktop
+      </Button>
     </div>
   );
 };
-

@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MockConversionResult, ConversionError } from "@/types/conversion";
+import { ConversionResult, ConversionError } from "@/types/conversion";
 import {
   CheckCircle2,
   AlertTriangle,
@@ -11,9 +11,13 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  openResultFile,
+  revealResultFile,
+} from "@/services/tauriConversionService";
 
 interface ResultPanelProps {
-  result: MockConversionResult | null;
+  result: ConversionResult | null;
   error: ConversionError | null;
   onReset: () => void;
 }
@@ -64,13 +68,33 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
   }
 
   if (result) {
+    const handleOpenFile = async () => {
+      try {
+        await openResultFile(result.outputPath);
+      } catch (err: any) {
+        toast.error("Gagal membuka berkas", {
+          description: err?.message || String(err),
+        });
+      }
+    };
+
+    const handleRevealFolder = async () => {
+      try {
+        await revealResultFile(result.outputPath);
+      } catch (err: any) {
+        toast.error("Gagal membuka folder tujuan", {
+          description: err?.message || String(err),
+        });
+      }
+    };
+
     return (
       <Card className="border-emerald-500/40 bg-emerald-500/5 shadow-md animate-in fade-in duration-200">
         <CardHeader className="py-4 px-5 border-b border-emerald-500/20 flex flex-row items-center gap-2.5">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <div>
             <CardTitle className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-              Konversi Berhasil (Simulasi UI)
+              Konversi Berhasil
             </CardTitle>
             <p className="text-[11px] text-muted-foreground mt-0.5">
               Selesai dalam {result.durationMs} ms pada {result.createdAt}
@@ -95,6 +119,15 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
               </span>
             </div>
 
+            {result.totalPages !== undefined && (
+              <div className="flex items-center justify-between border-t pt-2">
+                <span className="text-muted-foreground">Total Halaman:</span>
+                <span className="font-mono text-foreground">
+                  {result.totalPages} Halaman
+                </span>
+              </div>
+            )}
+
             <div className="flex items-center justify-between border-t pt-2">
               <span className="text-muted-foreground">Lokasi:</span>
               <span
@@ -111,11 +144,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
               variant="outline"
               size="sm"
               className="text-xs gap-1.5"
-              onClick={() =>
-                toast.info("Aksi Buka Berkas (Tauri Opener Plugin)", {
-                  description: `Akan membuka: ${result.outputFileName} di aplikasi default PDF`,
-                })
-              }
+              onClick={handleOpenFile}
             >
               <ExternalLink className="w-3.5 h-3.5" /> Buka Berkas
             </Button>
@@ -124,13 +153,9 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
               variant="outline"
               size="sm"
               className="text-xs gap-1.5"
-              onClick={() =>
-                toast.info("Aksi Buka Folder (Tauri Opener Plugin)", {
-                  description: `Akan membuka explorer ke direktori tujuan`,
-                })
-              }
+              onClick={handleRevealFolder}
             >
-              <FolderOpen className="w-3.5 h-3.5" /> Buka Folder
+              <FolderOpen className="w-3.5 h-3.5" /> Buka di Folder
             </Button>
           </div>
 
@@ -148,4 +173,3 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 
   return null;
 };
-

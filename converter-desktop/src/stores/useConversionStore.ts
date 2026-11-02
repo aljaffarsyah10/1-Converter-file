@@ -3,24 +3,32 @@ import {
   StagedFile,
   ToolOptionsState,
   ConversionStatus,
-  MockConversionResult,
+  ConversionResult,
   ConversionError,
 } from "@/types/conversion";
-import { executeMockConversion, MockProcessController } from "@/services/mockConversionService";
+import {
+  executeTauriMergePdf,
+  executeTauriSplitPdf,
+  executeTauriImageToPdf,
+  executeTauriWordToPdf,
+  getDefaultOutputDir,
+} from "@/services/tauriConversionService";
 
 interface ConversionStoreState {
   files: StagedFile[];
   status: ConversionStatus;
   progress: number;
   currentStage: string;
-  result: MockConversionResult | null;
+  result: ConversionResult | null;
   error: ConversionError | null;
-  controller: MockProcessController | null;
+  outputDir: string;
 
   // Options State
   optionsState: ToolOptionsState;
 
   // Actions
+  setOutputDir: (dir: string) => void;
+  loadDefaultOutputDir: () => Promise<void>;
   addFiles: (newFiles: StagedFile[]) => void;
   removeFile: (id: string) => void;
   reorderFiles: (fromIndex: number, toIndex: number) => void;
@@ -31,7 +39,7 @@ interface ConversionStoreState {
   updateImageOptions: (opts: Partial<Extract<ToolOptionsState, { type: "image-to-pdf" }>["options"]>) => void;
   updateWordOptions: (opts: Partial<Extract<ToolOptionsState, { type: "word-to-pdf" }>["options"]>) => void;
 
-  startConversion: (toolId: string) => void;
+  startConversion: (toolId: string) => Promise<void>;
   cancelConversion: () => void;
   resetJob: () => void;
 }
@@ -43,17 +51,29 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
   currentStage: "Siap",
   result: null,
   error: null,
-  controller: null,
+  outputDir: "",
 
   optionsState: {
     type: "merge-pdf",
     options: { outputFileName: "merged_document.pdf" },
   },
 
+  setOutputDir: (dir: string) => set({ outputDir: dir }),
+
+  loadDefaultOutputDir: async () => {
+    try {
+      const dir = await getDefaultOutputDir();
+      if (dir) {
+        set({ outputDir: dir });
+      }
+    } catch (err) {
+      console.warn("Failed to load default output directory:", err);
+    }
+  },
+
   addFiles: (newFiles) => {
     set((state) => ({
       files: [...state.files, ...newFiles],
-      // If was in error or success, reset to idle
       status: state.status === "success" || state.status === "error" ? "idle" : state.status,
       result: null,
       error: null,
@@ -183,8 +203,13 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
     });
   },
 
-  startConversion: (toolId) => {
-    const { files, optionsState } = get();
+  startConversion: async (toolId) => {
+    const { files, optionsState, status, outputDir } = get();
+
+    // Prevent duplicate calls
+    if (status === "validating" || status === "processing") {
+      return;
+    }
 
     if (files.length === 0) {
       set({
@@ -193,6 +218,32 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           code: "NO_FILES",
           message: "Tidak ada berkas yang dipilih.",
           actionableHint: "Tambahkan berkas terlebih dahulu melalui dropzone.",
+        },
+      });
+      return;
+    }
+
+    if (toolId === "merge-pdf" && files.length < 2) {
+      set({
+        status: "error",
+        error: {
+          code: "TOO_FEW_FILES",
+          message: "Penggabungan PDF membutuhkan minimal 2 berkas.",
+          actionableHint: "Pilih setidaknya 2 berkas PDF untuk digabungkan.",
+        },
+      });
+      return;
+    }
+
+    // Verify all files have valid paths
+    const invalidFile = files.find((f) => !f.path || f.path.trim() === "");
+    if (invalidFile) {
+      set({
+        status: "error",
+        error: {
+          code: "INVALID_PATH",
+          message: `Berkas "${invalidFile.name}" tidak memiliki path absolut pada filesystem.`,
+          actionableHint: "Gunakan tombol 'Pilih Berkas' untuk memilih berkas dari sistem.",
         },
       });
       return;
@@ -207,49 +258,106 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
       result: null,
     });
 
-    const controller = executeMockConversion(
-      toolId,
-      files,
-      optionsState,
-      (percent, stage) => {
-        set({
-          status: "processing",
-          progress: percent,
-          currentStage: stage,
-        });
-      },
-      (result) => {
-        set({
-          status: "success",
-          progress: 100,
-          currentStage: "Konversi Selesai",
-          result,
-          controller: null,
-        });
-      },
-      (error) => {
-        set({
-          status: "error",
-          currentStage: "Gagal",
-          error,
-          controller: null,
-        });
-      }
-    );
+    const onProgress = (percent: number, stage: string) => {
+      set({
+        status: "processing",
+        progress: percent,
+        currentStage: stage,
+      });
+    };
 
-    set({ controller });
+    try {
+      let res: ConversionResult;
+
+      switch (toolId) {
+        case "merge-pdf": {
+          const opts =
+            optionsState.type === "merge-pdf"
+              ? optionsState.options
+              : { outputFileName: "merged_document.pdf" };
+          res = await executeTauriMergePdf(
+            files,
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress
+          );
+          break;
+        }
+        case "split-pdf": {
+          const opts =
+            optionsState.type === "split-pdf"
+              ? optionsState.options
+              : {
+                  splitMode: "extract_range" as const,
+                  pageRange: "1-2",
+                  outputPrefix: "split_document",
+                };
+          res = await executeTauriSplitPdf(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress
+          );
+          break;
+        }
+        case "image-to-pdf": {
+          const opts =
+            optionsState.type === "image-to-pdf"
+              ? optionsState.options
+              : {
+                  orientation: "auto" as const,
+                  pageSize: "A4" as const,
+                  margin: "small" as const,
+                  outputFileName: "converted_images.pdf",
+                };
+          res = await executeTauriImageToPdf(
+            files,
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress
+          );
+          break;
+        }
+        case "word-to-pdf": {
+          const opts =
+            optionsState.type === "word-to-pdf"
+              ? optionsState.options
+              : {
+                  outputFileName: "converted_document.pdf",
+                  openAfterConvert: true,
+                };
+          res = await executeTauriWordToPdf(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress
+          );
+          break;
+        }
+        default:
+          throw new Error(`Tool "${toolId}" tidak dikenali.`);
+      }
+
+      set({
+        status: "success",
+        progress: 100,
+        currentStage: "Konversi Selesai",
+        result: res,
+      });
+    } catch (err: any) {
+      set({
+        status: "error",
+        currentStage: "Gagal",
+        error: {
+          code: err.code || "CONVERSION_ERROR",
+          message: err.message || "Gagal melakukan konversi berkas.",
+          actionableHint: err.actionableHint || "Periksa kembali berkas dan izin direktori.",
+        },
+      });
+    }
   },
 
   cancelConversion: () => {
-    const { controller } = get();
-    if (controller) {
-      controller.cancel();
-    }
     set({
       status: "idle",
       progress: 0,
       currentStage: "Dibatalkan",
-      controller: null,
     });
   },
 
@@ -260,8 +368,6 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
       currentStage: "Siap",
       result: null,
       error: null,
-      controller: null,
     });
   },
 }));
-

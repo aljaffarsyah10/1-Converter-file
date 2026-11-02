@@ -9,10 +9,12 @@ import { ConversionOptionsPanel } from "@/components/conversion/ConversionOption
 import { ProgressDisplay } from "@/components/conversion/ProgressDisplay";
 import { ResultPanel } from "@/components/conversion/ResultPanel";
 import { Button } from "@/components/ui/button";
-import { Play, Sparkles } from "lucide-react";
+import { Play } from "lucide-react";
+import { pickDirectory } from "@/services/tauriConversionService";
+import { toast } from "sonner";
 
 export const ToolWorkspacePage: React.FC = () => {
-  const { selectedToolId, defaultOutputPath } = useAppStore();
+  const { selectedToolId } = useAppStore();
   const tool =
     TOOLS_CATALOG.find((t) => t.id === selectedToolId) || TOOLS_CATALOG[0];
 
@@ -24,6 +26,9 @@ export const ToolWorkspacePage: React.FC = () => {
     result,
     error,
     optionsState,
+    outputDir,
+    setOutputDir,
+    loadDefaultOutputDir,
     addFiles,
     removeFile,
     reorderFiles,
@@ -38,30 +43,37 @@ export const ToolWorkspacePage: React.FC = () => {
     resetJob,
   } = useConversionStore();
 
-  // Initialize options whenever toolId changes
+  // Initialize options and default output dir
   useEffect(() => {
     initToolOptions(tool.id);
-  }, [tool.id, initToolOptions]);
+    if (!outputDir) {
+      loadDefaultOutputDir();
+    }
+  }, [tool.id, initToolOptions, loadDefaultOutputDir, outputDir]);
+
+  const handlePickOutputDir = async () => {
+    try {
+      const selected = await pickDirectory(outputDir || undefined);
+      if (selected) {
+        setOutputDir(selected);
+        toast.success("Folder tujuan berhasil diubah", {
+          description: selected,
+        });
+      }
+    } catch (err: any) {
+      toast.error("Gagal memilih folder", {
+        description: err?.message || String(err),
+      });
+    }
+  };
 
   const isProcessing = status === "processing" || status === "validating";
   const canReorder = tool.id === "merge-pdf" || tool.id === "image-to-pdf";
-  const maxFiles = tool.id === "split-pdf" || tool.id === "word-to-pdf" ? 1 : undefined;
+  const maxFiles =
+    tool.id === "split-pdf" || tool.id === "word-to-pdf" ? 1 : undefined;
 
   return (
     <PageContainer>
-      {/* Mock Workflow Banner notice */}
-      <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2 text-primary font-medium">
-          <Sparkles className="w-4 h-4 shrink-0" />
-          <span>
-            Mode Simulasi UI (Phase 6): Alur validasi, pemilihan berkas, progres, dan state hasil aktif menggunakan Mock Service.
-          </span>
-        </div>
-        <span className="font-mono text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded uppercase font-bold">
-          Mock Active
-        </span>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Column: Dropzone and Staged File List (2 cols on lg) */}
         <div className="lg:col-span-2 space-y-4">
@@ -103,8 +115,9 @@ export const ToolWorkspacePage: React.FC = () => {
             <ConversionOptionsPanel
               toolId={tool.id}
               optionsState={optionsState}
-              defaultOutputPath={defaultOutputPath}
+              defaultOutputPath={outputDir || "Memuat folder default..."}
               disabled={isProcessing}
+              onPickOutputDir={handlePickOutputDir}
               onUpdateMerge={updateMergeOptions}
               onUpdateSplit={updateSplitOptions}
               onUpdateImage={updateImageOptions}
@@ -118,7 +131,7 @@ export const ToolWorkspacePage: React.FC = () => {
               size="lg"
               disabled={files.length === 0}
               onClick={() => startConversion(tool.id)}
-              className="w-full text-xs font-semibold gap-2 shadow-md h-10"
+              className="w-full text-xs font-semibold gap-2 shadow-md h-10 cursor-pointer"
             >
               <Play className="w-4 h-4" />
               Mulai Konversi {tool.name}
