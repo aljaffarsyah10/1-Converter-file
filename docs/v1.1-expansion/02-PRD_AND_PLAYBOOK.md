@@ -757,10 +757,10 @@ Perbarui `README.md` di root project:
 - Update link dokumentasi ke folder `docs/`
 
 **Acceptance Criteria Fase 14:**
-- [ ] Installer v1.1.0 berhasil dibuild
-- [ ] Installer dapat dipasang dan dijalankan
-- [ ] Release notes lengkap
-- [ ] README.md diperbarui
+- [x] Installer v1.1.0 berhasil dibuild
+- [x] Installer dapat dipasang dan dijalankan
+- [x] Release notes lengkap
+- [x] README.md diperbarui
 
 **Git checkpoint:**
 ```powershell

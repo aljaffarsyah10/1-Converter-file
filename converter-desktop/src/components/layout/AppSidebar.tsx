@@ -77,7 +77,7 @@ export const AppSidebar: React.FC = () => {
           Files are processed on this device. No uploads to cloud.
         </p>
         <div className="mt-3 text-[10px] text-muted-foreground font-mono">
-          v0.1.0 • Desktop MVP
+          v1.1.0 • Expansion
         </div>
       </div>
     </aside>
