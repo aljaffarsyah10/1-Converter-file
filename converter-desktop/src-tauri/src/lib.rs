@@ -5,7 +5,7 @@ pub mod models;
 pub mod services;
 
 use commands::convert::{
-    convert_compress_pdf, convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_image, convert_pdf_to_word, convert_split_pdf, convert_word_to_pdf,
+    convert_compress_pdf, convert_excel_to_pdf, convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_image, convert_pdf_to_word, convert_split_pdf, convert_word_to_pdf,
 };
 use commands::system::{get_default_output_dir, get_files_metadata, get_system_engine_info};
 
@@ -29,6 +29,7 @@ pub fn run() {
             convert_pdf_to_word,
             convert_pdf_to_image,
             convert_compress_pdf,
+            convert_excel_to_pdf,
             get_system_engine_info,
             get_default_output_dir,
             get_files_metadata,
@@ -666,6 +667,93 @@ mod tests {
             None,
         );
         assert!(res_txt.is_err(), "Non-PDF extension must fail");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_excel_to_pdf_xlsx_success() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_xlsx = fixtures_dir.join("sample.xlsx").to_string_lossy().to_string();
+        if !Path::new(&sample_xlsx).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_excel_to_pdf_xlsx");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("xlsx_converted.pdf");
+
+        let res = converters::excel_to_pdf::convert_excel_to_pdf(
+            &sample_xlsx,
+            &out_pdf.to_string_lossy(),
+        );
+        assert!(res.is_ok(), "Convert XLSX to PDF should succeed: {:?}", res.err());
+        let result = res.unwrap();
+        assert!(result.success);
+        assert!(out_pdf.exists());
+        assert!(result.total_pages >= 1);
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_excel_to_pdf_csv_success() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_csv = fixtures_dir.join("sample.csv").to_string_lossy().to_string();
+        if !Path::new(&sample_csv).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_excel_to_pdf_csv");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("csv_converted.pdf");
+
+        let res = converters::excel_to_pdf::convert_excel_to_pdf(
+            &sample_csv,
+            &out_pdf.to_string_lossy(),
+        );
+        assert!(res.is_ok(), "Convert CSV to PDF should succeed: {:?}", res.err());
+        let result = res.unwrap();
+        assert!(result.success);
+        assert!(out_pdf.exists());
+        assert!(result.total_pages >= 1);
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_excel_to_pdf_invalid_inputs() {
+        let temp_dir = std::env::temp_dir().join("test_excel_to_pdf_invalid");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        // 1. Non-existent file
+        let fake = "C:\\path\\does_not_exist_xyz.xlsx";
+        let out1 = temp_dir.join("out1.pdf");
+        let res_fake = converters::excel_to_pdf::convert_excel_to_pdf(
+            fake,
+            &out1.to_string_lossy(),
+        );
+        assert!(res_fake.is_err(), "Non existent file must fail");
+
+        // 2. 0-byte file
+        let empty_xlsx = temp_dir.join("empty.xlsx");
+        fs::write(&empty_xlsx, b"").expect("write empty");
+        let out2 = temp_dir.join("out2.pdf");
+        let res_empty = converters::excel_to_pdf::convert_excel_to_pdf(
+            &empty_xlsx.to_string_lossy(),
+            &out2.to_string_lossy(),
+        );
+        assert!(res_empty.is_err(), "0-byte Excel file must fail");
+
+        // 3. Unsupported format
+        let txt_file = temp_dir.join("file.txt");
+        fs::write(&txt_file, b"data").expect("write txt");
+        let out3 = temp_dir.join("out3.pdf");
+        let res_txt = converters::excel_to_pdf::convert_excel_to_pdf(
+            &txt_file.to_string_lossy(),
+            &out3.to_string_lossy(),
+        );
+        assert!(res_txt.is_err(), "Unsupported format must fail");
 
         let _ = fs::remove_dir_all(temp_dir);
     }

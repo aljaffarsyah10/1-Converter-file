@@ -14,6 +14,7 @@ import {
   executeTauriPdfToWord,
   executeTauriPdfToImage,
   executeTauriCompressPdf,
+  executeTauriExcelToPdf,
   getDefaultOutputDir,
 } from "@/services/tauriConversionService";
 
@@ -44,6 +45,7 @@ interface ConversionStoreState {
   updatePdfToWordOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pdf-to-word" }>["options"]>) => void;
   updatePdfToImageOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pdf-to-image" }>["options"]>) => void;
   updateCompressPdfOptions: (opts: Partial<Extract<ToolOptionsState, { type: "compress-pdf" }>["options"]>) => void;
+  updateExcelOptions: (opts: Partial<Extract<ToolOptionsState, { type: "excel-to-pdf" }>["options"]>) => void;
 
   startConversion: (toolId: string) => Promise<void>;
   cancelConversion: () => void;
@@ -173,6 +175,15 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           },
         };
         break;
+      case "excel-to-pdf":
+        optionsState = {
+          type: "excel-to-pdf",
+          options: {
+            outputFileName: "converted_spreadsheet.pdf",
+            openAfterConvert: true,
+          },
+        };
+        break;
       default:
         optionsState = {
           type: "merge-pdf",
@@ -265,6 +276,18 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
   updateCompressPdfOptions: (opts) => {
     set((state) => {
       if (state.optionsState.type !== "compress-pdf") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  updateExcelOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "excel-to-pdf") return state;
       return {
         optionsState: {
           ...state.optionsState,
@@ -442,6 +465,21 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
                   level: "medium" as const,
                 };
           res = await executeTauriCompressPdf(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress
+          );
+          break;
+        }
+        case "excel-to-pdf": {
+          const opts =
+            optionsState.type === "excel-to-pdf"
+              ? optionsState.options
+              : {
+                  outputFileName: "converted_spreadsheet.pdf",
+                  openAfterConvert: true,
+                };
+          res = await executeTauriExcelToPdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
             onProgress

@@ -18,6 +18,7 @@ interface ConversionOptionsPanelProps {
   onUpdatePdfToWord?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
   onUpdatePdfToImage?: (opts: { format?: "png" | "jpg"; dpi?: 150 | 300; pageRange?: string; outputPrefix?: string }) => void;
   onUpdateCompress?: (opts: { outputFileName?: string; level?: "low" | "medium" | "high" }) => void;
+  onUpdateExcel?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
 }
 
 export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
@@ -33,6 +34,7 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   onUpdatePdfToWord,
   onUpdatePdfToImage,
   onUpdateCompress,
+  onUpdateExcel,
 }) => {
   return (
     <Card className="border shadow-sm">
@@ -384,6 +386,28 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
               Menghapus objek mubazir dan mengoptimalkan kompresi gambar secara lokal.
+            </p>
+          </div>
+        )}
+        {/* 8. Excel to PDF Options */}
+        {toolId === "excel-to-pdf" && optionsState.type === "excel-to-pdf" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Hasil (.pdf)
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdateExcel?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="converted_spreadsheet.pdf"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Mengonversi spreadsheet XLSX, XLS, atau CSV menjadi halaman PDF secara rapi dan offline.
             </p>
           </div>
         )}

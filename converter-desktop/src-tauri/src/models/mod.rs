@@ -35,6 +35,13 @@ pub struct WordToPdfRequest {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct ExcelToPdfRequest {
+    pub input_path: String,
+    pub output_path: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct PdfToWordRequest {
     pub input_path: String,
     pub output_path: String,

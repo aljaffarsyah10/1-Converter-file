@@ -1,8 +1,8 @@
-use crate::converters::{docx_to_pdf, image_to_pdf, pdf_compress, pdf_merge, pdf_split, pdf_to_image, pdf_to_word};
+use crate::converters::{docx_to_pdf, excel_to_pdf, image_to_pdf, pdf_compress, pdf_merge, pdf_split, pdf_to_image, pdf_to_word};
 use crate::errors::AppError;
 use crate::models::{
-    CompressPdfRequest, ConversionResult, ImageToPdfRequest, MergePdfRequest, PdfToImageRequest,
-    PdfToWordRequest, ProgressEvent, SplitPdfRequest, WordToPdfRequest,
+    CompressPdfRequest, ConversionResult, ExcelToPdfRequest, ImageToPdfRequest, MergePdfRequest,
+    PdfToImageRequest, PdfToWordRequest, ProgressEvent, SplitPdfRequest, WordToPdfRequest,
 };
 use tauri::{AppHandle, Emitter};
 
@@ -109,5 +109,17 @@ pub fn execute_compress_pdf(
     emit_progress(&app, &job_id, 100, "Kompresi PDF selesai");
     Ok(result)
 }
+
+pub fn execute_excel_to_pdf(
+    app: AppHandle,
+    job_id: String,
+    req: ExcelToPdfRequest,
+) -> Result<ConversionResult, AppError> {
+    emit_progress(&app, &job_id, 15, "Menyiapkan engine dokumen spreadsheet...");
+    let result = excel_to_pdf::convert_excel_to_pdf(&req.input_path, &req.output_path)?;
+    emit_progress(&app, &job_id, 100, "Konversi Excel ke PDF selesai");
+    Ok(result)
+}
+
 
 

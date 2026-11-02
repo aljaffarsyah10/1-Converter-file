@@ -1,4 +1,5 @@
 pub mod docx_to_pdf;
+pub mod excel_to_pdf;
 pub mod image_to_pdf;
 pub mod pdf_compress;
 pub mod pdf_merge;

@@ -328,10 +328,10 @@ Buat file `converters/excel_to_pdf.rs`:
 ### 4.3 Integrasi & Testing
 
 **Acceptance Criteria Fase 4:**
-- [ ] Konversi XLSX/CSV → PDF berhasil via COM atau LibreOffice
-- [ ] 3 unit test lulus
-- [ ] Deteksi engine berfungsi
-- [ ] Semua fitur sebelumnya tetap berjalan
+- [x] Konversi XLSX/CSV → PDF berhasil via COM atau LibreOffice (`excel_to_pdf.rs`, `poc_excel_to_pdf.rs`)
+- [x] 3 unit test lulus (`test_excel_to_pdf_xlsx_success`, `test_excel_to_pdf_csv_success`, `test_excel_to_pdf_invalid_inputs`)
+- [x] Deteksi engine berfungsi (`detect_excel_engine` mendeteksi Excel COM / LibreOffice)
+- [x] Semua fitur sebelumnya tetap berjalan (`cargo test` 27/27 test lulus)
 
 **Git checkpoint:**
 ```powershell
