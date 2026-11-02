@@ -47,3 +47,4 @@ export const ProgressDisplay: React.FC<ProgressDisplayProps> = ({
     </Card>
   );
 };
+

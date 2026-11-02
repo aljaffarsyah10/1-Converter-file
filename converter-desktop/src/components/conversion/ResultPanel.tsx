@@ -148,3 +148,4 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 
   return null;
 };
+

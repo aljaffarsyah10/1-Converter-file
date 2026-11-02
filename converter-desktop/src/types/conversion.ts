@@ -57,3 +57,4 @@ export interface ConversionError {
   message: string;
   actionableHint?: string;
 }
+
