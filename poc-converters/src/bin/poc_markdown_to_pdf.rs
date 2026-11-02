@@ -119,3 +119,4 @@ fn main() {
     assert!(text.contains("Contoh Kode"));
     println!("ALL CHECKS PASSED!");
 }
+
