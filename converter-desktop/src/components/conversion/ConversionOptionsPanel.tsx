@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToolOptionsState } from "@/types/conversion";
-import { Settings2, FolderOpen, AlertCircle, Lock, Unlock, Eye, EyeOff, Stamp } from "lucide-react";
+import { Settings2, FolderOpen, AlertCircle, Lock, Unlock, Eye, EyeOff, Stamp, ImageDown, RefreshCw, Scaling } from "lucide-react";
 
 interface ConversionOptionsPanelProps {
   toolId: string;
@@ -75,6 +75,24 @@ interface ConversionOptionsPanelProps {
     position?: "diagonal" | "center";
     color?: string;
   }) => void;
+  onUpdateCompressImage?: (opts: {
+    outputFileName?: string;
+    quality?: number;
+    level?: "low" | "medium" | "high";
+  }) => void;
+  onUpdateConvertImage?: (opts: {
+    outputFileName?: string;
+    targetFormat?: "png" | "jpg" | "webp" | "bmp";
+  }) => void;
+  onUpdateResizeImage?: (opts: {
+    outputFileName?: string;
+    resizeMode?: "dimensions" | "percentage";
+    width?: number;
+    height?: number;
+    scalePercent?: number;
+    maintainAspectRatio?: boolean;
+  }) => void;
+
 
 
 }
@@ -99,6 +117,9 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   onUpdateProtect,
   onUpdateUnlock,
   onUpdateWatermark,
+  onUpdateCompressImage,
+  onUpdateConvertImage,
+  onUpdateResizeImage,
 }) => {
   const [showProtectPass, setShowProtectPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
@@ -671,6 +692,217 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
           </div>
         )}
 
+
+
+        {/* 15. Compress Image Options */}
+        {toolId === "image-compress" && optionsState.type === "image-compress" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <ImageDown className="w-3.5 h-3.5 text-primary" />
+                Tingkat Kompresi
+              </label>
+              <div className="grid grid-cols-3 gap-1">
+                {[
+                  { level: "low" as const, label: "Tinggi", desc: "Ukuran Terkecil (40%)" },
+                  { level: "medium" as const, label: "Sedang", desc: "Seimbang (70%)" },
+                  { level: "high" as const, label: "Kualitas", desc: "Visual Tajam (85%)" },
+                ].map((item) => (
+                  <Button
+                    key={item.level}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.level === item.level ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-10 flex flex-col items-center justify-center text-xs p-1"
+                    onClick={() => onUpdateCompressImage?.({ level: item.level })}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Hasil
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdateCompressImage?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="compressed_image"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Mengoptimalkan ukuran berkas gambar tanpa mengurangi kejelasan visual secara signifikan.
+            </p>
+          </div>
+        )}
+
+        {/* 16. Convert Image Options */}
+        {toolId === "image-convert" && optionsState.type === "image-convert" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <RefreshCw className="w-3.5 h-3.5 text-primary" />
+                Format Target
+              </label>
+              <div className="grid grid-cols-4 gap-1">
+                {(["png", "jpg", "webp", "bmp"] as const).map((fmt) => (
+                  <Button
+                    key={fmt}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.targetFormat === fmt ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-9 uppercase font-bold text-xs"
+                    onClick={() => onUpdateConvertImage?.({ targetFormat: fmt })}
+                  >
+                    {fmt}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Hasil
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdateConvertImage?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="converted_image"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Mengonversi berkas gambar antar format modern (PNG, JPG, WebP, BMP) secara langsung.
+            </p>
+          </div>
+        )}
+
+        {/* 17. Resize Image Options */}
+        {toolId === "image-resize" && optionsState.type === "image-resize" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <Scaling className="w-3.5 h-3.5 text-primary" />
+                Mode Pengubahan Ukuran
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { mode: "percentage" as const, label: "Persentase (%)" },
+                  { mode: "dimensions" as const, label: "Dimensi Piksel (px)" },
+                ].map((item) => (
+                  <Button
+                    key={item.mode}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.resizeMode === item.mode ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-8 text-xs font-semibold"
+                    onClick={() => onUpdateResizeImage?.({ resizeMode: item.mode })}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {optionsState.options.resizeMode === "percentage" ? (
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-foreground">
+                  Skala Ukuran ({optionsState.options.scalePercent || 50}%)
+                </label>
+                <div className="grid grid-cols-4 gap-1">
+                  {[25, 50, 75, 150].map((pct) => (
+                    <Button
+                      key={pct}
+                      type="button"
+                      size="sm"
+                      variant={optionsState.options.scalePercent === pct ? "default" : "outline"}
+                      disabled={disabled}
+                      className="h-8 text-xs font-semibold"
+                      onClick={() => onUpdateResizeImage?.({ scalePercent: pct })}
+                    >
+                      {pct}%
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-muted-foreground">
+                      Lebar (px)
+                    </label>
+                    <Input
+                      disabled={disabled}
+                      type="number"
+                      value={optionsState.options.width || ""}
+                      onChange={(e) => onUpdateResizeImage?.({ width: e.target.value ? parseInt(e.target.value) : undefined })}
+                      className="text-xs h-8 font-mono"
+                      placeholder="Contoh: 800"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-muted-foreground">
+                      Tinggi (px)
+                    </label>
+                    <Input
+                      disabled={disabled}
+                      type="number"
+                      value={optionsState.options.height || ""}
+                      onChange={(e) => onUpdateResizeImage?.({ height: e.target.value ? parseInt(e.target.value) : undefined })}
+                      className="text-xs h-8 font-mono"
+                      placeholder="Contoh: 600"
+                    />
+                  </div>
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    checked={optionsState.options.maintainAspectRatio}
+                    disabled={disabled}
+                    onChange={(e) => onUpdateResizeImage?.({ maintainAspectRatio: e.target.checked })}
+                    className="rounded border-gray-300 text-primary focus:ring-primary h-3.5 w-3.5"
+                  />
+                  <span className="text-xs font-medium text-foreground select-none">
+                    Pertahankan Rasio Aspek (Aspect Ratio)
+                  </span>
+                </label>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Hasil
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdateResizeImage?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="resized_image"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Mengubah dimensi lebar dan tinggi gambar dengan filter interpolasi Lanczos3 berkualitas tinggi.
+            </p>
+          </div>
+        )}
 
         {/* 14. Watermark PDF Options */}
         {toolId === "watermark-pdf" && optionsState.type === "watermark-pdf" && (

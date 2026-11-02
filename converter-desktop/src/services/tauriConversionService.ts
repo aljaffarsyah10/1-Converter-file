@@ -22,6 +22,9 @@ import {
   RotatePdfOptions,
   UnlockPdfOptions,
   WatermarkPdfOptions,
+  CompressImageOptions,
+  ConvertImageOptions,
+  ResizeImageOptions,
 } from "@/types/conversion";
 
 interface BackendConversionResult {
@@ -929,6 +932,156 @@ export async function executeTauriWatermarkPdf(
       outputSizeFormatted: formatBytes(result.fileSizeBytes),
       durationMs: Number(result.durationMs),
       totalPages: result.totalPages,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+    };
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}
+export async function executeTauriCompressImage(
+  file: StagedFile,
+  options: CompressImageOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-img-compress-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const ext = file.name.split('.').pop() || "jpg";
+    const baseName =
+      options.outputFileName.replace(/\.[^/.]+$/, "") ||
+      file.name.replace(/\.[^/.]+$/, "") + "-compressed";
+    const outputPath = `${outDir}\\${baseName}.${ext}`;
+
+    const result = await invoke<BackendConversionResult>("convert_compress_image", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputPath,
+        quality: options.quality,
+        level: options.level,
+      },
+    });
+
+    return {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: 1,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+      originalSizeBytes: result.originalSizeBytes,
+      compressedSizeBytes: result.fileSizeBytes,
+      reductionPercent: result.reductionPercent,
+    };
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}
+
+export async function executeTauriConvertImage(
+  file: StagedFile,
+  options: ConvertImageOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-img-convert-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const baseName =
+      options.outputFileName.replace(/\.[^/.]+$/, "") ||
+      file.name.replace(/\.[^/.]+$/, "") + "-converted";
+    const targetExt = options.targetFormat.toLowerCase();
+    const outputPath = `${outDir}\\${baseName}.${targetExt}`;
+
+    const result = await invoke<BackendConversionResult>("convert_convert_image", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputPath,
+        targetFormat: options.targetFormat,
+      },
+    });
+
+    return {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: 1,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+    };
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}
+
+export async function executeTauriResizeImage(
+  file: StagedFile,
+  options: ResizeImageOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-img-resize-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const ext = file.name.split('.').pop() || "png";
+    const baseName =
+      options.outputFileName.replace(/\.[^/.]+$/, "") ||
+      file.name.replace(/\.[^/.]+$/, "") + "-resized";
+    const outputPath = `${outDir}\\${baseName}.${ext}`;
+
+    const result = await invoke<BackendConversionResult>("convert_resize_image", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputPath,
+        width: options.resizeMode === "dimensions" ? options.width || null : null,
+        height: options.resizeMode === "dimensions" ? options.height || null : null,
+        scalePercent: options.resizeMode === "percentage" ? options.scalePercent || null : null,
+        maintainAspectRatio: options.maintainAspectRatio,
+      },
+    });
+
+    return {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: 1,
       createdAt: new Date().toLocaleTimeString("id-ID"),
     };
   } catch (err) {

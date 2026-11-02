@@ -100,6 +100,34 @@ pub struct WatermarkPdfRequest {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct CompressImageRequest {
+    pub input_path: String,
+    pub output_path: String,
+    pub quality: Option<u8>,
+    pub level: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ConvertImageRequest {
+    pub input_path: String,
+    pub output_path: String,
+    pub target_format: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ResizeImageRequest {
+    pub input_path: String,
+    pub output_path: String,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
+    pub scale_percent: Option<f64>,
+    pub maintain_aspect_ratio: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct PdfToImageRequest {
     pub input_path: String,
     pub output_dir: String,

@@ -21,6 +21,9 @@ import {
   executeTauriRotatePdf,
   executeTauriUnlockPdf,
   executeTauriWatermarkPdf,
+  executeTauriCompressImage,
+  executeTauriConvertImage,
+  executeTauriResizeImage,
   getDefaultOutputDir,
 } from "@/services/tauriConversionService";
 
@@ -110,6 +113,22 @@ interface ConversionStoreState {
     updateWatermarkOptions: (
     opts: Partial<
       Extract<ToolOptionsState, { type: "watermark-pdf" }>["options"]
+    >,
+  ) => void;
+
+    updateCompressImageOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "image-compress" }>["options"]
+    >,
+  ) => void;
+  updateConvertImageOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "image-convert" }>["options"]
+    >,
+  ) => void;
+  updateResizeImageOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "image-resize" }>["options"]
     >,
   ) => void;
 
@@ -313,6 +332,35 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           },
         };
         break;
+            case "image-compress":
+        optionsState = {
+          type: "image-compress",
+          options: {
+            outputFileName: "compressed_image",
+            level: "medium",
+          },
+        };
+        break;
+      case "image-convert":
+        optionsState = {
+          type: "image-convert",
+          options: {
+            outputFileName: "converted_image",
+            targetFormat: "png",
+          },
+        };
+        break;
+      case "image-resize":
+        optionsState = {
+          type: "image-resize",
+          options: {
+            outputFileName: "resized_image",
+            resizeMode: "percentage",
+            scalePercent: 50,
+            maintainAspectRatio: true,
+          },
+        };
+        break;
       default:
         optionsState = {
           type: "merge-pdf",
@@ -491,6 +539,43 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
   updateWatermarkOptions: (opts) => {
     set((state) => {
       if (state.optionsState.type !== "watermark-pdf") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  
+  updateCompressImageOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "image-compress") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  updateConvertImageOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "image-convert") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  updateResizeImageOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "image-resize") return state;
       return {
         optionsState: {
           ...state.optionsState,
@@ -836,6 +921,53 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
                   position: "diagonal" as const,
                 };
           res = await executeTauriWatermarkPdf(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress,
+          );
+          break;
+        }
+                case "image-compress": {
+          const opts =
+            optionsState.type === "image-compress"
+              ? optionsState.options
+              : {
+                  outputFileName: "compressed_image",
+                  level: "medium" as const,
+                };
+          res = await executeTauriCompressImage(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress,
+          );
+          break;
+        }
+        case "image-convert": {
+          const opts =
+            optionsState.type === "image-convert"
+              ? optionsState.options
+              : {
+                  outputFileName: "converted_image",
+                  targetFormat: "png" as const,
+                };
+          res = await executeTauriConvertImage(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress,
+          );
+          break;
+        }
+        case "image-resize": {
+          const opts =
+            optionsState.type === "image-resize"
+              ? optionsState.options
+              : {
+                  outputFileName: "resized_image",
+                  resizeMode: "percentage" as const,
+                  scalePercent: 50,
+                  maintainAspectRatio: true,
+                };
+          res = await executeTauriResizeImage(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
             onProgress,

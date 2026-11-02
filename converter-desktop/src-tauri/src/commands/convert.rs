@@ -1,7 +1,7 @@
 use crate::models::{
-    CompressPdfRequest, ConversionResult, ExcelToPdfRequest, ImageToPdfRequest, MergePdfRequest,
+    CompressImageRequest, CompressPdfRequest, ConversionResult, ConvertImageRequest, ExcelToPdfRequest, ImageToPdfRequest, MergePdfRequest,
     PdfToExcelRequest, PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, ProtectPdfRequest,
-    RotatePdfRequest,
+    ResizeImageRequest, RotatePdfRequest,
     SplitPdfRequest, UnlockPdfRequest, WatermarkPdfRequest, WordToPdfRequest,
 };
 use crate::services::conversion_service;
@@ -196,6 +196,47 @@ pub async fn convert_watermark_pdf(
 ) -> Result<ConversionResult, String> {
     tauri::async_runtime::spawn_blocking(move || {
         conversion_service::execute_watermark_pdf(app, job_id, request)
+    })
+    .await
+    .map_err(|e| format!("Task execution error: {}", e))?
+    .map_err(|e| e.to_string())
+}
+#[tauri::command]
+pub async fn convert_compress_image(
+    app: AppHandle,
+    job_id: String,
+    request: CompressImageRequest,
+) -> Result<ConversionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        conversion_service::execute_compress_image(app, job_id, request)
+    })
+    .await
+    .map_err(|e| format!("Task execution error: {}", e))?
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn convert_convert_image(
+    app: AppHandle,
+    job_id: String,
+    request: ConvertImageRequest,
+) -> Result<ConversionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        conversion_service::execute_convert_image(app, job_id, request)
+    })
+    .await
+    .map_err(|e| format!("Task execution error: {}", e))?
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn convert_resize_image(
+    app: AppHandle,
+    job_id: String,
+    request: ResizeImageRequest,
+) -> Result<ConversionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        conversion_service::execute_resize_image(app, job_id, request)
     })
     .await
     .map_err(|e| format!("Task execution error: {}", e))?

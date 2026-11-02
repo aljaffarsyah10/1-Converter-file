@@ -579,11 +579,11 @@ Tambahkan 3 Tauri commands dan 3 workspace UI:
 Unit test: 3 per tool = 9 test total.
 
 **Acceptance Criteria Fase 10:**
-- [ ] Compress Image mengurangi ukuran file
-- [ ] Convert Image menghasilkan format yang benar
-- [ ] Resize Image menghasilkan dimensi yang tepat
-- [ ] 9 unit test lulus
-- [ ] Semua fitur sebelumnya tetap berjalan
+- [x] Compress Image mengurangi ukuran file
+- [x] Convert Image menghasilkan format yang benar
+- [x] Resize Image menghasilkan dimensi yang tepat
+- [x] 9 unit test lulus
+- [x] Semua fitur sebelumnya tetap berjalan
 
 **Git checkpoint:**
 ```powershell

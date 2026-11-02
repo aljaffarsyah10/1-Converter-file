@@ -97,6 +97,30 @@ export interface UnlockPdfOptions {
   password: string;
 }
 
+
+export interface CompressImageOptions {
+  outputFileName: string;
+  outputDir?: string;
+  quality?: number;
+  level: "low" | "medium" | "high";
+}
+
+export interface ConvertImageOptions {
+  outputFileName: string;
+  outputDir?: string;
+  targetFormat: "png" | "jpg" | "webp" | "bmp";
+}
+
+export interface ResizeImageOptions {
+  outputFileName: string;
+  outputDir?: string;
+  resizeMode: "dimensions" | "percentage";
+  width?: number;
+  height?: number;
+  scalePercent?: number;
+  maintainAspectRatio: boolean;
+}
+
 export interface RotatePdfOptions {
   outputFileName: string;
   outputDir?: string;
@@ -118,7 +142,10 @@ export type ToolOptionsState =
   | { type: "rotate-pdf"; options: RotatePdfOptions }
   | { type: "protect-pdf"; options: ProtectPdfOptions }
   | { type: "unlock-pdf"; options: UnlockPdfOptions }
-  | { type: "watermark-pdf"; options: WatermarkPdfOptions };
+  | { type: "watermark-pdf"; options: WatermarkPdfOptions }
+  | { type: "image-compress"; options: CompressImageOptions }
+  | { type: "image-convert"; options: ConvertImageOptions }
+  | { type: "image-resize"; options: ResizeImageOptions };
 
 export type ConversionStatus =
   | "idle"

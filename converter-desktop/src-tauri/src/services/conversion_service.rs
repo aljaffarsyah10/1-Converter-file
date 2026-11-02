@@ -1,12 +1,12 @@
 use crate::converters::{
-    docx_to_pdf, excel_to_pdf, image_to_pdf, pdf_compress, pdf_merge, pdf_protect, pdf_rotate,
+    docx_to_pdf, excel_to_pdf, image_compress, image_convert, image_resize, image_to_pdf, pdf_compress, pdf_merge, pdf_protect, pdf_rotate,
     pdf_split, pdf_to_excel, pdf_to_image, pdf_to_word, pdf_unlock, pdf_watermark, pptx_to_pdf,
 };
 use crate::errors::AppError;
 use crate::models::{
-    CompressPdfRequest, ConversionResult, ExcelToPdfRequest, ImageToPdfRequest, MergePdfRequest,
+    CompressImageRequest, CompressPdfRequest, ConversionResult, ConvertImageRequest, ExcelToPdfRequest, ImageToPdfRequest, MergePdfRequest,
     PdfToExcelRequest, PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, ProgressEvent,
-    ProtectPdfRequest, RotatePdfRequest, SplitPdfRequest, UnlockPdfRequest, WatermarkPdfRequest, WordToPdfRequest,
+    ProtectPdfRequest, ResizeImageRequest, RotatePdfRequest, SplitPdfRequest, UnlockPdfRequest, WatermarkPdfRequest, WordToPdfRequest,
 };
 use tauri::{AppHandle, Emitter};
 
@@ -200,6 +200,54 @@ pub fn execute_watermark_pdf(
         req.color.as_deref(),
     )?;
     emit_progress(&app, &job_id, 100, "Penambahan watermark selesai");
+    Ok(result)
+}
+pub fn execute_compress_image(
+    app: AppHandle,
+    job_id: String,
+    req: CompressImageRequest,
+) -> Result<ConversionResult, AppError> {
+    emit_progress(&app, &job_id, 20, "Mengompresi dan mengoptimalkan gambar...");
+    let result = image_compress::compress_image_file(
+        &req.input_path,
+        &req.output_path,
+        req.quality,
+        req.level.as_deref(),
+    )?;
+    emit_progress(&app, &job_id, 100, "Kompresi gambar selesai");
+    Ok(result)
+}
+
+pub fn execute_convert_image(
+    app: AppHandle,
+    job_id: String,
+    req: ConvertImageRequest,
+) -> Result<ConversionResult, AppError> {
+    emit_progress(&app, &job_id, 20, "Mengonversi format gambar...");
+    let result = image_convert::convert_image_format(
+        &req.input_path,
+        &req.output_path,
+        &req.target_format,
+    )?;
+    emit_progress(&app, &job_id, 100, "Konversi format gambar selesai");
+    Ok(result)
+}
+
+pub fn execute_resize_image(
+    app: AppHandle,
+    job_id: String,
+    req: ResizeImageRequest,
+) -> Result<ConversionResult, AppError> {
+    emit_progress(&app, &job_id, 20, "Mengubah dimensi ukuran gambar...");
+    let result = image_resize::resize_image_file(
+        &req.input_path,
+        &req.output_path,
+        req.width,
+        req.height,
+        req.scale_percent,
+        req.maintain_aspect_ratio,
+    )?;
+    emit_progress(&app, &job_id, 100, "Pengubahan ukuran gambar selesai");
     Ok(result)
 }
 

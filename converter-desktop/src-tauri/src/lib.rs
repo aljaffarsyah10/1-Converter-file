@@ -5,10 +5,11 @@ pub mod models;
 pub mod services;
 
 use commands::convert::{
-    convert_compress_pdf, convert_excel_to_pdf, convert_image_to_pdf, convert_merge_pdf,
-    convert_pdf_to_excel, convert_pdf_to_image, convert_pdf_to_word, convert_pptx_to_pdf,
-    convert_protect_pdf, convert_rotate_pdf, convert_split_pdf, convert_unlock_pdf,
-    convert_watermark_pdf, convert_word_to_pdf,
+    convert_compress_image, convert_compress_pdf, convert_convert_image, convert_excel_to_pdf,
+    convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_excel, convert_pdf_to_image,
+    convert_pdf_to_word, convert_pptx_to_pdf, convert_protect_pdf, convert_resize_image,
+    convert_rotate_pdf, convert_split_pdf, convert_unlock_pdf, convert_watermark_pdf,
+    convert_word_to_pdf,
 };
 use commands::system::{get_default_output_dir, get_files_metadata, get_system_engine_info};
 
@@ -39,6 +40,9 @@ pub fn run() {
             convert_protect_pdf,
             convert_unlock_pdf,
             convert_watermark_pdf,
+            convert_compress_image,
+            convert_convert_image,
+            convert_resize_image,
             get_system_engine_info,
             get_default_output_dir,
             get_files_metadata,
@@ -1296,6 +1300,262 @@ mod tests {
             );
             assert!(res_empty_txt.is_err(), "Empty watermark text must fail");
         }
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    // === FASE 10: Image Tools Tests ===
+
+    #[test]
+    fn test_image_compress_reduces_size() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_jpg = fixtures_dir.join("sample.jpg").to_string_lossy().to_string();
+        if !Path::new(&sample_jpg).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_img_compress_jpg");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_jpg = temp_dir.join("compressed.jpg");
+
+        let res = converters::image_compress::compress_image_file(
+            &sample_jpg,
+            &out_jpg.to_string_lossy(),
+            Some(40),
+            None,
+        );
+        assert!(res.is_ok(), "Image compress should succeed: {:?}", res.err());
+        let res_data = res.unwrap();
+        assert!(res_data.success);
+        assert!(out_jpg.exists());
+        assert!(res_data.file_size_bytes > 0);
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_image_compress_png() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
+        if !Path::new(&sample_png).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_img_compress_png");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_png = temp_dir.join("compressed.png");
+
+        let res = converters::image_compress::compress_image_file(
+            &sample_png,
+            &out_png.to_string_lossy(),
+            None,
+            Some("high"),
+        );
+        assert!(res.is_ok(), "PNG compress should succeed");
+        assert!(out_png.exists());
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_image_compress_invalid_input() {
+        let temp_dir = std::env::temp_dir().join("test_img_compress_invalid");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        let fake = r"C:\path\does_not_exist_image.jpg";
+        let out1 = temp_dir.join("out1.jpg");
+        let res_fake = converters::image_compress::compress_image_file(
+            fake,
+            &out1.to_string_lossy(),
+            Some(50),
+            None,
+        );
+        assert!(res_fake.is_err(), "Non-existent image must fail");
+
+        let empty = temp_dir.join("empty.jpg");
+        fs::write(&empty, b"").expect("write empty");
+        let out2 = temp_dir.join("out2.jpg");
+        let res_empty = converters::image_compress::compress_image_file(
+            &empty.to_string_lossy(),
+            &out2.to_string_lossy(),
+            Some(50),
+            None,
+        );
+        assert!(res_empty.is_err(), "0-byte image must fail");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_image_convert_png_to_webp() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
+        if !Path::new(&sample_png).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_img_convert_webp");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_webp = temp_dir.join("converted.webp");
+
+        let res = converters::image_convert::convert_image_format(
+            &sample_png,
+            &out_webp.to_string_lossy(),
+            "webp",
+        );
+        assert!(res.is_ok(), "Convert PNG to WebP should succeed");
+        assert!(out_webp.exists());
+
+        // Verify readable
+        let loaded = image::open(&out_webp);
+        assert!(loaded.is_ok(), "Converted WebP must be valid readable image");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_image_convert_png_to_jpeg() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
+        if !Path::new(&sample_png).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_img_convert_jpeg");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_jpg = temp_dir.join("converted.jpg");
+
+        let res = converters::image_convert::convert_image_format(
+            &sample_png,
+            &out_jpg.to_string_lossy(),
+            "jpg",
+        );
+        assert!(res.is_ok(), "Convert PNG to JPG should succeed");
+        assert!(out_jpg.exists());
+
+        let loaded = image::open(&out_jpg);
+        assert!(loaded.is_ok(), "Converted JPG must be valid readable image");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_image_convert_invalid_format() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
+        if !Path::new(&sample_png).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_img_convert_invalid");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out = temp_dir.join("out.xyz");
+
+        let res = converters::image_convert::convert_image_format(
+            &sample_png,
+            &out.to_string_lossy(),
+            "unsupported_xyz",
+        );
+        assert!(res.is_err(), "Unsupported target format must fail");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_image_resize_dimensions() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
+        if !Path::new(&sample_png).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_img_resize_dim");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_png = temp_dir.join("resized_64.png");
+
+        let res = converters::image_resize::resize_image_file(
+            &sample_png,
+            &out_png.to_string_lossy(),
+            Some(64),
+            Some(64),
+            None,
+            Some(true),
+        );
+        assert!(res.is_ok(), "Resize should succeed");
+
+        let img = image::open(&out_png).expect("load resized");
+        assert!(img.width() <= 64);
+        assert!(img.height() <= 64);
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_image_resize_scale_percentage() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
+        if !Path::new(&sample_png).exists() {
+            return;
+        }
+
+        let orig_img = image::open(&sample_png).expect("load original");
+        let orig_w = orig_img.width();
+        let orig_h = orig_img.height();
+
+        let temp_dir = std::env::temp_dir().join("test_img_resize_scale");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_png = temp_dir.join("resized_50pct.png");
+
+        let res = converters::image_resize::resize_image_file(
+            &sample_png,
+            &out_png.to_string_lossy(),
+            None,
+            None,
+            Some(50.0),
+            None,
+        );
+        assert!(res.is_ok(), "Resize 50% should succeed");
+
+        let img = image::open(&out_png).expect("load resized");
+        assert_eq!(img.width(), orig_w / 2);
+        assert_eq!(img.height(), orig_h / 2);
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_image_resize_invalid_inputs() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
+        if !Path::new(&sample_png).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_img_resize_invalid");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_png = temp_dir.join("out.png");
+
+        // No width, no height, no scale provided
+        let res_no_dim = converters::image_resize::resize_image_file(
+            &sample_png,
+            &out_png.to_string_lossy(),
+            None,
+            None,
+            None,
+            None,
+        );
+        assert!(res_no_dim.is_err(), "Must provide width, height or scale");
+
+        // Non existent input
+        let res_fake = converters::image_resize::resize_image_file(
+            r"C:\path\does_not_exist_image.png",
+            &out_png.to_string_lossy(),
+            Some(100),
+            Some(100),
+            None,
+            None,
+        );
+        assert!(res_fake.is_err(), "Non existent file must fail");
 
         let _ = fs::remove_dir_all(temp_dir);
     }

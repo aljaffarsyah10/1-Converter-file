@@ -48,6 +48,9 @@ export const ToolWorkspacePage: React.FC = () => {
     updateProtectOptions,
     updateUnlockOptions,
     updateWatermarkOptions,
+    updateCompressImageOptions,
+    updateConvertImageOptions,
+    updateResizeImageOptions,
     startConversion,
     cancelConversion,
     resetJob,
@@ -91,7 +94,10 @@ export const ToolWorkspacePage: React.FC = () => {
     tool.id === "rotate-pdf" ||
     tool.id === "protect-pdf" ||
     tool.id === "unlock-pdf" ||
-    tool.id === "watermark-pdf"
+    tool.id === "watermark-pdf" ||
+    tool.id === "image-compress" ||
+    tool.id === "image-convert" ||
+    tool.id === "image-resize"
       ? 1
       : undefined;
 
@@ -155,6 +161,9 @@ export const ToolWorkspacePage: React.FC = () => {
               onUpdateProtect={updateProtectOptions}
               onUpdateUnlock={updateUnlockOptions}
               onUpdateWatermark={updateWatermarkOptions}
+              onUpdateCompressImage={updateCompressImageOptions}
+              onUpdateConvertImage={updateConvertImageOptions}
+              onUpdateResizeImage={updateResizeImageOptions}
             />
           )}
 
