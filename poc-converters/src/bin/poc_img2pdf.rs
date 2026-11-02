@@ -140,3 +140,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Verification: Created PDF with {} pages successfully", doc.get_pages().len());
     Ok(())
 }
+

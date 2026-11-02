@@ -99,3 +99,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("VERIFICATION PASSED: Merged PDF structure is 100% valid.");
     Ok(())
 }
+

@@ -23,3 +23,4 @@ path = "src/bin/poc_img2pdf.rs"
 [[bin]]
 name = "poc_docx2pdf"
 path = "src/bin/poc_docx2pdf.rs"
+

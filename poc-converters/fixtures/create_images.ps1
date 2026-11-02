@@ -23,3 +23,4 @@ $g2.Dispose()
 $bmp2.Save("D:\Konverter\poc-converters\fixtures\sample.jpg", [System.Drawing.Imaging.ImageFormat]::Jpeg)
 $bmp2.Dispose()
 Write-Host "JPG created"
+
