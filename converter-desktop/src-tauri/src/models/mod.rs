@@ -72,6 +72,22 @@ pub struct RotatePdfRequest {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct ProtectPdfRequest {
+    pub input_path: String,
+    pub output_path: String,
+    pub password: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UnlockPdfRequest {
+    pub input_path: String,
+    pub output_path: String,
+    pub password: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct PdfToImageRequest {
     pub input_path: String,
     pub output_dir: String,

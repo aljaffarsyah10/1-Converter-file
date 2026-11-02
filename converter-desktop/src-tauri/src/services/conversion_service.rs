@@ -1,12 +1,12 @@
 use crate::converters::{
-    docx_to_pdf, excel_to_pdf, image_to_pdf, pdf_compress, pdf_merge, pdf_rotate, pdf_split,
-    pdf_to_excel, pdf_to_image, pdf_to_word, pptx_to_pdf,
+    docx_to_pdf, excel_to_pdf, image_to_pdf, pdf_compress, pdf_merge, pdf_protect, pdf_rotate,
+    pdf_split, pdf_to_excel, pdf_to_image, pdf_to_word, pdf_unlock, pptx_to_pdf,
 };
 use crate::errors::AppError;
 use crate::models::{
     CompressPdfRequest, ConversionResult, ExcelToPdfRequest, ImageToPdfRequest, MergePdfRequest,
     PdfToExcelRequest, PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, ProgressEvent,
-    RotatePdfRequest, SplitPdfRequest, WordToPdfRequest,
+    ProtectPdfRequest, RotatePdfRequest, SplitPdfRequest, UnlockPdfRequest, WordToPdfRequest,
 };
 use tauri::{AppHandle, Emitter};
 
@@ -160,6 +160,28 @@ pub fn execute_rotate_pdf(
         req.page_range.as_deref(),
     )?;
     emit_progress(&app, &job_id, 100, "Rotasi PDF selesai");
+    Ok(result)
+}
+
+pub fn execute_protect_pdf(
+    app: AppHandle,
+    job_id: String,
+    req: ProtectPdfRequest,
+) -> Result<ConversionResult, AppError> {
+    emit_progress(&app, &job_id, 20, "Menerapkan enkripsi dan password pada PDF...");
+    let result = pdf_protect::protect_pdf(&req.input_path, &req.output_path, &req.password)?;
+    emit_progress(&app, &job_id, 100, "Proteksi PDF selesai");
+    Ok(result)
+}
+
+pub fn execute_unlock_pdf(
+    app: AppHandle,
+    job_id: String,
+    req: UnlockPdfRequest,
+) -> Result<ConversionResult, AppError> {
+    emit_progress(&app, &job_id, 20, "Membuka enkripsi password PDF...");
+    let result = pdf_unlock::unlock_pdf(&req.input_path, &req.output_path, &req.password)?;
+    emit_progress(&app, &job_id, 100, "Pembukaan proteksi PDF selesai");
     Ok(result)
 }
 

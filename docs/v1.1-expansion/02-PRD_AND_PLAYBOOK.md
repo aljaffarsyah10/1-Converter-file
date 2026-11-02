@@ -490,10 +490,10 @@ Buat `converters/pdf_unlock.rs`:
 - Ubah kedua tool → `isAvailable: true`.
 
 **Acceptance Criteria Fase 8:**
-- [ ] Protect PDF berhasil mengunci dengan password
-- [ ] Unlock PDF berhasil membuka dengan password yang benar
-- [ ] Password salah → error yang jelas
-- [ ] 6 unit test total (3 per tool) lulus
+- [x] Protect PDF berhasil mengunci dengan password
+- [x] Unlock PDF berhasil membuka dengan password yang benar
+- [x] Password salah → error yang jelas
+- [x] 6 unit test total (3 per tool) lulus
 
 **Git checkpoint:**
 ```powershell

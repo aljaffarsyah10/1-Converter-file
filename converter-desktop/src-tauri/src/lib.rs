@@ -5,7 +5,10 @@ pub mod models;
 pub mod services;
 
 use commands::convert::{
-    convert_compress_pdf, convert_excel_to_pdf, convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_excel, convert_pdf_to_image, convert_pdf_to_word, convert_pptx_to_pdf, convert_rotate_pdf, convert_split_pdf, convert_word_to_pdf,
+    convert_compress_pdf, convert_excel_to_pdf, convert_image_to_pdf, convert_merge_pdf,
+    convert_pdf_to_excel, convert_pdf_to_image, convert_pdf_to_word, convert_pptx_to_pdf,
+    convert_protect_pdf, convert_rotate_pdf, convert_split_pdf, convert_unlock_pdf,
+    convert_word_to_pdf,
 };
 use commands::system::{get_default_output_dir, get_files_metadata, get_system_engine_info};
 
@@ -33,6 +36,8 @@ pub fn run() {
             convert_pptx_to_pdf,
             convert_pdf_to_excel,
             convert_rotate_pdf,
+            convert_protect_pdf,
+            convert_unlock_pdf,
             get_system_engine_info,
             get_default_output_dir,
             get_files_metadata,
@@ -1010,6 +1015,170 @@ mod tests {
             );
             assert!(res_oob.is_err(), "Page 99 on 2-page PDF must fail");
         }
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_protect_pdf_success() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_protect_pdf_success");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("protected.pdf");
+
+        let res = converters::pdf_protect::protect_pdf(
+            &sample1,
+            &out_pdf.to_string_lossy(),
+            "secret123",
+        );
+        assert!(res.is_ok(), "Protect PDF should succeed: {:?}", res.err());
+
+        let doc = lopdf::Document::load(&out_pdf).expect("load protected");
+        assert!(doc.is_encrypted(), "Protected PDF must report is_encrypted == true");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_protect_pdf_empty_password() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_protect_empty_pass");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("protected.pdf");
+
+        let res = converters::pdf_protect::protect_pdf(
+            &sample1,
+            &out_pdf.to_string_lossy(),
+            "   ",
+        );
+        assert!(res.is_err(), "Empty password must fail");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_protect_pdf_invalid_input() {
+        let temp_dir = std::env::temp_dir().join("test_protect_invalid");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        let fake = r"C:\path\does_not_exist_xyz.pdf";
+        let out1 = temp_dir.join("out1.pdf");
+        let res_fake = converters::pdf_protect::protect_pdf(
+            fake,
+            &out1.to_string_lossy(),
+            "secret123",
+        );
+        assert!(res_fake.is_err(), "Non existent file must fail");
+
+        let empty_pdf = temp_dir.join("empty.pdf");
+        fs::write(&empty_pdf, b"").expect("write empty");
+        let out2 = temp_dir.join("out2.pdf");
+        let res_empty = converters::pdf_protect::protect_pdf(
+            &empty_pdf.to_string_lossy(),
+            &out2.to_string_lossy(),
+            "secret123",
+        );
+        assert!(res_empty.is_err(), "0-byte file must fail");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_unlock_pdf_success() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_unlock_pdf_success");
+        let _ = fs::create_dir_all(&temp_dir);
+        let prot_pdf = temp_dir.join("protected.pdf");
+        let unlock_pdf = temp_dir.join("unlocked.pdf");
+
+        // First protect
+        let res_prot = converters::pdf_protect::protect_pdf(
+            &sample1,
+            &prot_pdf.to_string_lossy(),
+            "unlockpass456",
+        );
+        assert!(res_prot.is_ok(), "Protect must succeed before unlock test");
+
+        // Then unlock
+        let res_unlock = converters::pdf_unlock::unlock_pdf(
+            &prot_pdf.to_string_lossy(),
+            &unlock_pdf.to_string_lossy(),
+            "unlockpass456",
+        );
+        assert!(res_unlock.is_ok(), "Unlock with correct password should succeed: {:?}", res_unlock.err());
+
+        let doc = lopdf::Document::load(&unlock_pdf).expect("load unlocked");
+        assert!(!doc.is_encrypted(), "Unlocked PDF must report is_encrypted == false");
+        let text = doc.extract_text(&[1]);
+        assert!(text.is_ok(), "Text should be extractable from unlocked PDF");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_unlock_pdf_wrong_password() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_unlock_wrong_pass");
+        let _ = fs::create_dir_all(&temp_dir);
+        let prot_pdf = temp_dir.join("protected.pdf");
+        let unlock_pdf = temp_dir.join("unlocked.pdf");
+
+        let res_prot = converters::pdf_protect::protect_pdf(
+            &sample1,
+            &prot_pdf.to_string_lossy(),
+            "correctpassword",
+        );
+        assert!(res_prot.is_ok(), "Protect must succeed");
+
+        let res_unlock = converters::pdf_unlock::unlock_pdf(
+            &prot_pdf.to_string_lossy(),
+            &unlock_pdf.to_string_lossy(),
+            "wrongpassword",
+        );
+        assert!(res_unlock.is_err(), "Unlock with wrong password must return error");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_unlock_pdf_unencrypted_document() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_unlock_unencrypted");
+        let _ = fs::create_dir_all(&temp_dir);
+        let unlock_pdf = temp_dir.join("unlocked.pdf");
+
+        // Attempt to unlock an unencrypted PDF
+        let res = converters::pdf_unlock::unlock_pdf(
+            &sample1,
+            &unlock_pdf.to_string_lossy(),
+            "anypass",
+        );
+        assert!(res.is_err(), "Unlocking an unencrypted PDF must fail");
 
         let _ = fs::remove_dir_all(temp_dir);
     }

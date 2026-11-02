@@ -10,6 +10,7 @@ flate2 = "1.0"
 docx-rs = "0.4.22"
 pdf-render = "1.2.0"
 rust_xlsxwriter = "0.80"
+md-5 = "0.10"
 
 [[bin]]
 name = "poc_merge"
@@ -54,4 +55,8 @@ path = "src/bin/poc_pdf_to_excel.rs"
 [[bin]]
 name = "poc_rotate_pdf"
 path = "src/bin/poc_rotate_pdf.rs"
+
+[[bin]]
+name = "poc_test_encryption"
+path = "src/bin/poc_test_encryption.rs"
 

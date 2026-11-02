@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToolOptionsState } from "@/types/conversion";
-import { Settings2, FolderOpen, AlertCircle } from "lucide-react";
+import { Settings2, FolderOpen, AlertCircle, Lock, Unlock, Eye, EyeOff } from "lucide-react";
 
 interface ConversionOptionsPanelProps {
   toolId: string;
@@ -58,6 +58,16 @@ interface ConversionOptionsPanelProps {
     angle?: 90 | 180 | 270;
     pageRange?: string;
   }) => void;
+  onUpdateProtect?: (opts: {
+    outputFileName?: string;
+    password?: string;
+    confirmPassword?: string;
+  }) => void;
+  onUpdateUnlock?: (opts: {
+    outputFileName?: string;
+    password?: string;
+  }) => void;
+
 }
 
 export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
@@ -77,7 +87,13 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   onUpdatePptx,
   onUpdatePdfToExcel,
   onUpdateRotate,
+  onUpdateProtect,
+  onUpdateUnlock,
 }) => {
+  const [showProtectPass, setShowProtectPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [showUnlockPass, setShowUnlockPass] = useState(false);
+
   return (
     <Card className="border shadow-sm">
       <CardHeader className="py-3 px-4 border-b">
@@ -563,6 +579,136 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
             </p>
           </div>
         )}
+
+        {/* 12. Protect PDF Options */}
+        {toolId === "protect-pdf" && optionsState.type === "protect-pdf" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-primary" />
+                Kata Sandi Baru (Password)
+              </label>
+              <div className="relative">
+                <Input
+                  disabled={disabled}
+                  type={showProtectPass ? "text" : "password"}
+                  value={optionsState.options.password}
+                  onChange={(e) => onUpdateProtect?.({ password: e.target.value })}
+                  className="text-xs h-8 pr-8"
+                  placeholder="Masukkan kata sandi perlindungan"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowProtectPass(!showProtectPass)}
+                  className="absolute right-2 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showProtectPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Konfirmasi Kata Sandi
+              </label>
+              <div className="relative">
+                <Input
+                  disabled={disabled}
+                  type={showConfirmPass ? "text" : "password"}
+                  value={optionsState.options.confirmPassword || ""}
+                  onChange={(e) => onUpdateProtect?.({ confirmPassword: e.target.value })}
+                  className="text-xs h-8 pr-8"
+                  placeholder="Ulangi kata sandi di atas"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPass(!showConfirmPass)}
+                  className="absolute right-2 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {optionsState.options.confirmPassword && (
+                <div className="text-[11px] font-medium">
+                  {optionsState.options.password === optionsState.options.confirmPassword ? (
+                    <span className="text-green-600 dark:text-green-400">✓ Kata sandi cocok</span>
+                  ) : (
+                    <span className="text-destructive">✗ Kata sandi tidak cocok</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Hasil (.pdf)
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdateProtect?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="protected_document.pdf"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Mengenkripsi berkas dengan standar keamanan 128-bit. Diperlukan kata sandi setiap kali berkas dibuka.
+            </p>
+          </div>
+        )}
+
+        {/* 13. Unlock PDF Options */}
+        {toolId === "unlock-pdf" && optionsState.type === "unlock-pdf" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <Unlock className="w-3.5 h-3.5 text-primary" />
+                Kata Sandi Pembuka
+              </label>
+              <div className="relative">
+                <Input
+                  disabled={disabled}
+                  type={showUnlockPass ? "text" : "password"}
+                  value={optionsState.options.password}
+                  onChange={(e) => onUpdateUnlock?.({ password: e.target.value })}
+                  className="text-xs h-8 pr-8"
+                  placeholder="Masukkan kata sandi dokumen PDF"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowUnlockPass(!showUnlockPass)}
+                  className="absolute right-2 top-2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showUnlockPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Hasil (.pdf)
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdateUnlock?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="unlocked_document.pdf"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Menghapus proteksi password secara permanen pada salinan PDF baru sehingga dapat dibuka bebas tanpa password.
+            </p>
+          </div>
+        )}
+
         {/* 11. Rotate PDF Options */}
         {toolId === "rotate-pdf" && optionsState.type === "rotate-pdf" && (
           <div className="space-y-3 pt-2 border-t">

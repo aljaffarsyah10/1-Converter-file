@@ -18,7 +18,9 @@ import {
   ExcelToPdfOptions,
   PptxToPdfOptions,
   PdfToExcelOptions,
+  ProtectPdfOptions,
   RotatePdfOptions,
+  UnlockPdfOptions,
 } from "@/types/conversion";
 
 interface BackendConversionResult {
@@ -776,3 +778,98 @@ export async function executeTauriRotatePdf(
     if (unlisten) unlisten();
   }
 }
+
+export async function executeTauriProtectPdf(
+  file: StagedFile,
+  options: ProtectPdfOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-protect-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const baseName =
+      options.outputFileName.replace(/\.pdf$/i, "") ||
+      file.name.replace(/\.pdf$/i, "") + "-protected";
+    const outputPath = `${outDir}\\${baseName}.pdf`;
+
+    const result = await invoke<BackendConversionResult>("convert_protect_pdf", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputPath,
+        password: options.password,
+      },
+    });
+
+    return {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: result.totalPages,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+    };
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}
+
+export async function executeTauriUnlockPdf(
+  file: StagedFile,
+  options: UnlockPdfOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-unlock-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const baseName =
+      options.outputFileName.replace(/\.pdf$/i, "") ||
+      file.name.replace(/\.pdf$/i, "") + "-unlocked";
+    const outputPath = `${outDir}\\${baseName}.pdf`;
+
+    const result = await invoke<BackendConversionResult>("convert_unlock_pdf", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputPath,
+        password: options.password,
+      },
+    });
+
+    return {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: result.totalPages,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+    };
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}
+

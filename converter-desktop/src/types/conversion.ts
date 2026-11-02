@@ -72,6 +72,20 @@ export interface PdfToExcelOptions {
   openAfterConvert: boolean;
 }
 
+
+export interface ProtectPdfOptions {
+  outputFileName: string;
+  outputDir?: string;
+  password: string;
+  confirmPassword?: string;
+}
+
+export interface UnlockPdfOptions {
+  outputFileName: string;
+  outputDir?: string;
+  password: string;
+}
+
 export interface RotatePdfOptions {
   outputFileName: string;
   outputDir?: string;
@@ -90,7 +104,9 @@ export type ToolOptionsState =
   | { type: "excel-to-pdf"; options: ExcelToPdfOptions }
   | { type: "pptx-to-pdf"; options: PptxToPdfOptions }
   | { type: "pdf-to-excel"; options: PdfToExcelOptions }
-  | { type: "rotate-pdf"; options: RotatePdfOptions };
+  | { type: "rotate-pdf"; options: RotatePdfOptions }
+  | { type: "protect-pdf"; options: ProtectPdfOptions }
+  | { type: "unlock-pdf"; options: UnlockPdfOptions };
 
 export type ConversionStatus =
   | "idle"

@@ -17,7 +17,9 @@ import {
   executeTauriExcelToPdf,
   executeTauriPptxToPdf,
   executeTauriPdfToExcel,
+  executeTauriProtectPdf,
   executeTauriRotatePdf,
+  executeTauriUnlockPdf,
   getDefaultOutputDir,
 } from "@/services/tauriConversionService";
 
@@ -90,6 +92,17 @@ interface ConversionStoreState {
   updateRotateOptions: (
     opts: Partial<
       Extract<ToolOptionsState, { type: "rotate-pdf" }>["options"]
+    >,
+  ) => void;
+
+    updateProtectOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "protect-pdf" }>["options"]
+    >,
+  ) => void;
+  updateUnlockOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "unlock-pdf" }>["options"]
     >,
   ) => void;
 
@@ -261,6 +274,25 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           },
         };
         break;
+            case "protect-pdf":
+        optionsState = {
+          type: "protect-pdf",
+          options: {
+            outputFileName: "protected_document.pdf",
+            password: "",
+            confirmPassword: "",
+          },
+        };
+        break;
+      case "unlock-pdf":
+        optionsState = {
+          type: "unlock-pdf",
+          options: {
+            outputFileName: "unlocked_document.pdf",
+            password: "",
+          },
+        };
+        break;
       default:
         optionsState = {
           type: "merge-pdf",
@@ -410,6 +442,31 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
     });
   },
 
+  
+  updateProtectOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "protect-pdf") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  updateUnlockOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "unlock-pdf") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
   startConversion: async (toolId) => {
     const { files, optionsState, status, outputDir } = get();
 
@@ -428,6 +485,48 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
         },
       });
       return;
+    }
+
+    
+    if (toolId === "protect-pdf") {
+      const opts = optionsState.type === "protect-pdf" ? optionsState.options : null;
+      if (!opts?.password || opts.password.trim().length === 0) {
+        set({
+          status: "error",
+          error: {
+            code: "EMPTY_PASSWORD",
+            message: "Kata sandi tidak boleh kosong.",
+            actionableHint: "Masukkan kata sandi untuk melindungi berkas PDF.",
+          },
+        });
+        return;
+      }
+      if (opts.confirmPassword !== undefined && opts.confirmPassword !== "" && opts.confirmPassword !== opts.password) {
+        set({
+          status: "error",
+          error: {
+            code: "PASSWORD_MISMATCH",
+            message: "Konfirmasi kata sandi tidak cocok.",
+            actionableHint: "Pastikan kata sandi dan konfirmasi kata sandi sama persis.",
+          },
+        });
+        return;
+      }
+    }
+
+    if (toolId === "unlock-pdf") {
+      const opts = optionsState.type === "unlock-pdf" ? optionsState.options : null;
+      if (!opts?.password || opts.password.trim().length === 0) {
+        set({
+          status: "error",
+          error: {
+            code: "EMPTY_PASSWORD",
+            message: "Kata sandi tidak boleh kosong.",
+            actionableHint: "Masukkan kata sandi pembuka untuk berkas PDF.",
+          },
+        });
+        return;
+      }
     }
 
     if (toolId === "merge-pdf" && files.length < 2) {
@@ -640,6 +739,36 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
                   pageRange: "",
                 };
           res = await executeTauriRotatePdf(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress,
+          );
+          break;
+        }
+                case "protect-pdf": {
+          const opts =
+            optionsState.type === "protect-pdf"
+              ? optionsState.options
+              : {
+                  outputFileName: "protected_document.pdf",
+                  password: "",
+                };
+          res = await executeTauriProtectPdf(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress,
+          );
+          break;
+        }
+        case "unlock-pdf": {
+          const opts =
+            optionsState.type === "unlock-pdf"
+              ? optionsState.options
+              : {
+                  outputFileName: "unlocked_document.pdf",
+                  password: "",
+                };
+          res = await executeTauriUnlockPdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
             onProgress,

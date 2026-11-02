@@ -45,6 +45,8 @@ export const ToolWorkspacePage: React.FC = () => {
     updatePptxOptions,
     updatePdfToExcelOptions,
     updateRotateOptions,
+    updateProtectOptions,
+    updateUnlockOptions,
     startConversion,
     cancelConversion,
     resetJob,
@@ -85,7 +87,9 @@ export const ToolWorkspacePage: React.FC = () => {
     tool.id === "excel-to-pdf" ||
     tool.id === "pptx-to-pdf" ||
     tool.id === "pdf-to-excel" ||
-    tool.id === "rotate-pdf"
+    tool.id === "rotate-pdf" ||
+    tool.id === "protect-pdf" ||
+    tool.id === "unlock-pdf"
       ? 1
       : undefined;
 
@@ -146,6 +150,8 @@ export const ToolWorkspacePage: React.FC = () => {
               onUpdatePptx={updatePptxOptions}
               onUpdatePdfToExcel={updatePdfToExcelOptions}
               onUpdateRotate={updateRotateOptions}
+              onUpdateProtect={updateProtectOptions}
+              onUpdateUnlock={updateUnlockOptions}
             />
           )}
 

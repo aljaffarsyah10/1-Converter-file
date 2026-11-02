@@ -1,7 +1,8 @@
 use crate::models::{
     CompressPdfRequest, ConversionResult, ExcelToPdfRequest, ImageToPdfRequest, MergePdfRequest,
-    PdfToExcelRequest, PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, RotatePdfRequest,
-    SplitPdfRequest, WordToPdfRequest,
+    PdfToExcelRequest, PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, ProtectPdfRequest,
+    RotatePdfRequest,
+    SplitPdfRequest, UnlockPdfRequest, WordToPdfRequest,
 };
 use crate::services::conversion_service;
 use tauri::AppHandle;
@@ -160,8 +161,31 @@ pub async fn convert_rotate_pdf(
     .map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+pub async fn convert_protect_pdf(
+    app: AppHandle,
+    job_id: String,
+    request: ProtectPdfRequest,
+) -> Result<ConversionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        conversion_service::execute_protect_pdf(app, job_id, request)
+    })
+    .await
+    .map_err(|e| format!("Task execution error: {}", e))?
+    .map_err(|e| e.to_string())
+}
 
-
-
-
+#[tauri::command]
+pub async fn convert_unlock_pdf(
+    app: AppHandle,
+    job_id: String,
+    request: UnlockPdfRequest,
+) -> Result<ConversionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        conversion_service::execute_unlock_pdf(app, job_id, request)
+    })
+    .await
+    .map_err(|e| format!("Task execution error: {}", e))?
+    .map_err(|e| e.to_string())
+}
 
