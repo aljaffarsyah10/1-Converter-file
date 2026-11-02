@@ -107,7 +107,11 @@ pub fn convert_markdown_to_pdf(
 
     let html_doc = markdown_to_html_doc(&md_content, theme);
 
-    let temp_dir = std::env::temp_dir().join(format!("md2pdf_{}", std::process::id()));
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    let temp_dir = std::env::temp_dir().join(format!("md2pdf_{}_{}", std::process::id(), nanos));
     fs::create_dir_all(&temp_dir)?;
     let temp_html_path = temp_dir.join("content.html");
     fs::write(&temp_html_path, html_doc.as_bytes())?;

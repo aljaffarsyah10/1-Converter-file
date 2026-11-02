@@ -55,13 +55,25 @@ pub fn run() {
 
 #[cfg(test)]
 mod tests {
+    fn get_poc_converters_dir() -> std::path::PathBuf {
+        let p1 = std::path::PathBuf::from("../../poc-converters");
+        if p1.exists() {
+            return p1;
+        }
+        let p2 = std::path::PathBuf::from("../poc-converters");
+        if p2.exists() {
+            return p2;
+        }
+        std::path::PathBuf::from("poc-converters")
+    }
+
     use super::*;
     use std::fs;
     use std::path::Path;
 
     #[test]
     fn test_merge_pdf_backend() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         let sample2 = fixtures_dir.join("sample2.pdf").to_string_lossy().to_string();
 
@@ -70,7 +82,7 @@ mod tests {
             return;
         }
 
-        let output_path = Path::new("..").join("poc-converters").join("output").join("backend_test_merge.pdf");
+        let output_path = get_poc_converters_dir().join("output").join("backend_test_merge.pdf");
         let res = converters::pdf_merge::merge_pdf_files(&[sample1, sample2], &output_path.to_string_lossy());
         assert!(res.is_ok(), "Merge PDF backend should succeed");
         let result = res.unwrap();
@@ -80,14 +92,14 @@ mod tests {
 
     #[test]
     fn test_split_pdf_backend() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
 
         if !Path::new(&sample1).exists() {
             return;
         }
 
-        let output_dir = Path::new("..").join("poc-converters").join("output");
+        let output_dir = get_poc_converters_dir().join("output");
         let res = converters::pdf_split::split_pdf_file(
             &sample1,
             &output_dir.to_string_lossy(),
@@ -102,14 +114,14 @@ mod tests {
 
     #[test]
     fn test_split_all_backend() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
 
         if !Path::new(&sample1).exists() {
             return;
         }
 
-        let output_dir = Path::new("..").join("poc-converters").join("output");
+        let output_dir = get_poc_converters_dir().join("output");
         let res = converters::pdf_split::split_pdf_file(
             &sample1,
             &output_dir.to_string_lossy(),
@@ -124,7 +136,7 @@ mod tests {
 
     #[test]
     fn test_image_to_pdf_backend() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
         let jpg = fixtures_dir.join("sample.jpg").to_string_lossy().to_string();
 
@@ -132,7 +144,7 @@ mod tests {
             return;
         }
 
-        let output_path = Path::new("..").join("poc-converters").join("output").join("backend_test_img.pdf");
+        let output_path = get_poc_converters_dir().join("output").join("backend_test_img.pdf");
         let res = converters::image_to_pdf::convert_images_to_pdf(
             &[png, jpg],
             &output_path.to_string_lossy(),
@@ -196,7 +208,7 @@ mod tests {
 
     #[test]
     fn test_invalid_page_ranges_in_split() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
 
         if !Path::new(&sample1).exists() {
@@ -260,14 +272,14 @@ mod tests {
 
     #[test]
     fn test_source_files_remain_unmodified() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf");
         if !sample1.exists() {
             return;
         }
 
         let pre_bytes = fs::read(&sample1).expect("read pre");
-        let output_path = Path::new("..").join("poc-converters").join("output").join("test_integrity_out.pdf");
+        let output_path = get_poc_converters_dir().join("output").join("test_integrity_out.pdf");
 
         let _ = converters::pdf_merge::merge_pdf_files(
             &[sample1.to_string_lossy().to_string()],
@@ -280,7 +292,7 @@ mod tests {
 
     #[test]
     fn test_repeated_conversions_performance() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         let sample2 = fixtures_dir.join("sample2.pdf").to_string_lossy().to_string();
 
@@ -288,7 +300,7 @@ mod tests {
             return;
         }
 
-        let out_dir = Path::new("..").join("poc-converters").join("output");
+        let out_dir = get_poc_converters_dir().join("output");
         for i in 0..5 {
             let out_file = out_dir.join(format!("repeated_test_{}.pdf", i));
             let res = converters::pdf_merge::merge_pdf_files(
@@ -302,7 +314,7 @@ mod tests {
 
     #[test]
     fn test_multi_file_merge_three_files() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         let sample2 = fixtures_dir.join("sample2.pdf").to_string_lossy().to_string();
 
@@ -310,7 +322,7 @@ mod tests {
             return;
         }
 
-        let output_path = Path::new("..").join("poc-converters").join("output").join("test_merge_3_files.pdf");
+        let output_path = get_poc_converters_dir().join("output").join("test_merge_3_files.pdf");
         let res = converters::pdf_merge::merge_pdf_files(
             &[sample1.clone(), sample2, sample1],
             &output_path.to_string_lossy(),
@@ -336,7 +348,7 @@ mod tests {
 
     #[test]
     fn test_unicode_and_spaces_in_paths() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
 
         if !Path::new(&png).exists() {
@@ -361,7 +373,7 @@ mod tests {
 
     #[test]
     fn test_overwrite_existing_output_safely() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
 
         if !Path::new(&sample1).exists() {
@@ -386,7 +398,7 @@ mod tests {
 
     #[test]
     fn test_docx_to_pdf_conversion_e2e() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let docx = fixtures_dir.join("sample.docx").to_string_lossy().to_string();
 
         if !Path::new(&docx).exists() {
@@ -418,7 +430,7 @@ mod tests {
 
     #[test]
     fn test_pdf_to_word_success() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
 
         if !Path::new(&sample1).exists() {
@@ -480,7 +492,7 @@ mod tests {
 
     #[test]
     fn test_pdf_to_image_png_success() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
 
         if !Path::new(&sample1).exists() {
@@ -515,7 +527,7 @@ mod tests {
 
     #[test]
     fn test_pdf_to_image_jpg_single_page() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
 
         if !Path::new(&sample1).exists() {
@@ -575,7 +587,7 @@ mod tests {
         assert!(res_empty.is_err(), "0-byte PDF must fail gracefully");
 
         // 3. Out of bounds range
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if Path::new(&sample1).exists() {
             let res_oob = converters::pdf_to_image::convert_pdf_to_images(
@@ -594,7 +606,7 @@ mod tests {
 
     #[test]
     fn test_compress_pdf_success() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -623,7 +635,7 @@ mod tests {
 
     #[test]
     fn test_compress_pdf_levels() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -688,7 +700,7 @@ mod tests {
 
     #[test]
     fn test_excel_to_pdf_xlsx_success() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_xlsx = fixtures_dir.join("sample.xlsx").to_string_lossy().to_string();
         if !Path::new(&sample_xlsx).exists() {
             return;
@@ -713,7 +725,7 @@ mod tests {
 
     #[test]
     fn test_excel_to_pdf_csv_success() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_csv = fixtures_dir.join("sample.csv").to_string_lossy().to_string();
         if !Path::new(&sample_csv).exists() {
             return;
@@ -775,7 +787,7 @@ mod tests {
 
     #[test]
     fn test_pptx_to_pdf_success() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_pptx = fixtures_dir.join("sample.pptx").to_string_lossy().to_string();
         if !Path::new(&sample_pptx).exists() {
             return;
@@ -844,7 +856,7 @@ mod tests {
 
     #[test]
     fn test_pdf_to_excel_success() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -913,7 +925,7 @@ mod tests {
 
     #[test]
     fn test_rotate_pdf_all_pages_90() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -948,7 +960,7 @@ mod tests {
 
     #[test]
     fn test_rotate_pdf_specific_page() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -1010,7 +1022,7 @@ mod tests {
         assert!(res_empty.is_err(), "0-byte PDF must fail");
 
         // 3. Out-of-bounds page range
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if Path::new(&sample1).exists() {
             let out3 = temp_dir.join("out3.pdf");
@@ -1028,7 +1040,7 @@ mod tests {
 
     #[test]
     fn test_protect_pdf_success() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -1053,7 +1065,7 @@ mod tests {
 
     #[test]
     fn test_protect_pdf_empty_password() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -1102,7 +1114,7 @@ mod tests {
 
     #[test]
     fn test_unlock_pdf_success() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -1139,7 +1151,7 @@ mod tests {
 
     #[test]
     fn test_unlock_pdf_wrong_password() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -1169,7 +1181,7 @@ mod tests {
 
     #[test]
     fn test_unlock_pdf_unencrypted_document() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -1192,7 +1204,7 @@ mod tests {
 
     #[test]
     fn test_watermark_pdf_all_pages() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -1222,7 +1234,7 @@ mod tests {
 
     #[test]
     fn test_watermark_pdf_multipage_diagonal() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if !Path::new(&sample1).exists() {
             return;
@@ -1287,7 +1299,7 @@ mod tests {
         assert!(res_empty.is_err(), "0-byte PDF must fail");
 
         // 3. Empty text
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
         if Path::new(&sample1).exists() {
             let out3 = temp_dir.join("out3.pdf");
@@ -1310,7 +1322,7 @@ mod tests {
 
     #[test]
     fn test_image_compress_reduces_size() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_jpg = fixtures_dir.join("sample.jpg").to_string_lossy().to_string();
         if !Path::new(&sample_jpg).exists() {
             return;
@@ -1337,7 +1349,7 @@ mod tests {
 
     #[test]
     fn test_image_compress_png() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
         if !Path::new(&sample_png).exists() {
             return;
@@ -1390,7 +1402,7 @@ mod tests {
 
     #[test]
     fn test_image_convert_png_to_webp() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
         if !Path::new(&sample_png).exists() {
             return;
@@ -1417,7 +1429,7 @@ mod tests {
 
     #[test]
     fn test_image_convert_png_to_jpeg() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
         if !Path::new(&sample_png).exists() {
             return;
@@ -1443,7 +1455,7 @@ mod tests {
 
     #[test]
     fn test_image_convert_invalid_format() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
         if !Path::new(&sample_png).exists() {
             return;
@@ -1465,7 +1477,7 @@ mod tests {
 
     #[test]
     fn test_image_resize_dimensions() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
         if !Path::new(&sample_png).exists() {
             return;
@@ -1494,7 +1506,7 @@ mod tests {
 
     #[test]
     fn test_image_resize_scale_percentage() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
         if !Path::new(&sample_png).exists() {
             return;
@@ -1527,7 +1539,7 @@ mod tests {
 
     #[test]
     fn test_image_resize_invalid_inputs() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_png = fixtures_dir.join("sample.png").to_string_lossy().to_string();
         if !Path::new(&sample_png).exists() {
             return;
@@ -1566,7 +1578,7 @@ mod tests {
 
     #[test]
     fn test_html_to_pdf_conversion_success() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_html = fixtures_dir.join("sample.html").to_string_lossy().to_string();
         if !Path::new(&sample_html).exists() {
             return;
@@ -1596,7 +1608,7 @@ mod tests {
 
     #[test]
     fn test_html_to_pdf_options_landscape() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_html = fixtures_dir.join("sample.html").to_string_lossy().to_string();
         if !Path::new(&sample_html).exists() {
             return;
@@ -1670,7 +1682,7 @@ mod tests {
 
     #[test]
     fn test_markdown_to_pdf_conversion_success() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_md = fixtures_dir.join("sample.md").to_string_lossy().to_string();
         if !Path::new(&sample_md).exists() {
             return;
@@ -1701,7 +1713,7 @@ mod tests {
 
     #[test]
     fn test_markdown_to_pdf_minimal_theme() {
-        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let fixtures_dir = get_poc_converters_dir().join("fixtures");
         let sample_md = fixtures_dir.join("sample.md").to_string_lossy().to_string();
         if !Path::new(&sample_md).exists() {
             return;

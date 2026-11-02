@@ -125,8 +125,12 @@ pub fn convert_html_to_pdf(
         format!("{}{}", style_inject, html_content)
     };
 
-    // Prepare temp file
-    let temp_dir = std::env::temp_dir().join(format!("html2pdf_{}", std::process::id()));
+    // Prepare temp file with unique timestamp + process id to prevent thread race conditions
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    let temp_dir = std::env::temp_dir().join(format!("html2pdf_{}_{}", std::process::id(), nanos));
     fs::create_dir_all(&temp_dir)?;
     let temp_html_path = temp_dir.join("render.html");
     fs::write(&temp_html_path, final_html.as_bytes())?;

@@ -676,25 +676,25 @@ Jalankan `cargo test` dan pastikan **SEMUA** test (lama + baru) lulus:
 ### 13.2 Manual Testing Checklist
 
 Test manual untuk setiap fitur:
-- [ ] Merge PDF
-- [ ] Split PDF
-- [ ] Image to PDF
-- [ ] Word to PDF
-- [ ] PDF to Word
-- [ ] PDF to Image
-- [ ] Compress PDF
-- [ ] Excel to PDF
-- [ ] PowerPoint to PDF
-- [ ] PDF to Excel
-- [ ] Rotate PDF
-- [ ] Protect PDF
-- [ ] Unlock PDF
-- [ ] Watermark PDF
-- [ ] Compress Image
-- [ ] Convert Image
-- [ ] Resize Image
-- [ ] HTML to PDF
-- [ ] Markdown to PDF
+- [x] Merge PDF
+- [x] Split PDF
+- [x] Image to PDF
+- [x] Word to PDF
+- [x] PDF to Word
+- [x] PDF to Image
+- [x] Compress PDF
+- [x] Excel to PDF
+- [x] PowerPoint to PDF
+- [x] PDF to Excel
+- [x] Rotate PDF
+- [x] Protect PDF
+- [x] Unlock PDF
+- [x] Watermark PDF
+- [x] Compress Image
+- [x] Convert Image
+- [x] Resize Image
+- [x] HTML to PDF
+- [x] Markdown to PDF
 
 ### 13.3 Performance Benchmark
 
@@ -705,9 +705,9 @@ Ukur waktu konversi setiap tool dan dokumentasikan.
 Buat `docs/v1.1-expansion/03-TEST_REPORT.md` dengan format tabel hasil pengujian.
 
 **Acceptance Criteria Fase 13:**
-- [ ] ~60 unit test lulus tanpa failure
-- [ ] 19 fitur diuji manual dan berfungsi
-- [ ] Laporan test tersusun
+- [x] ~60 unit test lulus tanpa failure
+- [x] 19 fitur diuji manual dan berfungsi
+- [x] Laporan test tersusun
 
 **Git checkpoint:**
 ```powershell
