@@ -405,10 +405,10 @@ Buat file `converters/pdf_to_excel.rs`:
 - Ubah `pdf-to-excel` → `isAvailable: true`.
 
 **Acceptance Criteria Fase 6:**
-- [ ] Ekstraksi tabel dasar dari PDF → XLSX berfungsi
-- [ ] 3 unit test lulus
-- [ ] Limitasi didokumentasikan
-- [ ] Semua fitur sebelumnya tetap berjalan
+- [x] Ekstraksi tabel dasar dari PDF → XLSX berfungsi (`pdf_to_excel.rs`, `poc_pdf_to_excel.rs`)
+- [x] 3 unit test lulus (`test_pdf_to_excel_success`, `test_pdf_to_excel_invalid_inputs`, `test_pdf_to_excel_corrupted_empty`)
+- [x] Limitasi didokumentasikan (tabel berbasis teks terstruktur/pemisah spasi ganda/tab/pipe diekstrak ke sel numerik/teks, PDF murni pindaian gambar memerlukan OCR)
+- [x] Semua fitur sebelumnya tetap berjalan (`cargo test` 33/33 test lulus)
 
 **Git checkpoint:**
 ```powershell

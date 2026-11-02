@@ -56,6 +56,13 @@ pub struct PdfToWordRequest {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct PdfToExcelRequest {
+    pub input_path: String,
+    pub output_path: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct PdfToImageRequest {
     pub input_path: String,
     pub output_dir: String,

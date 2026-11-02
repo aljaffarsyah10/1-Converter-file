@@ -1,6 +1,7 @@
 use crate::models::{
     CompressPdfRequest, ConversionResult, ExcelToPdfRequest, ImageToPdfRequest, MergePdfRequest,
-    PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, SplitPdfRequest, WordToPdfRequest,
+    PdfToExcelRequest, PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, SplitPdfRequest,
+    WordToPdfRequest,
 };
 use crate::services::conversion_service;
 use tauri::AppHandle;
@@ -130,6 +131,21 @@ pub async fn convert_pptx_to_pdf(
     .map_err(|e| format!("Task execution error: {}", e))?
     .map_err(|e| e.to_string())
 }
+
+#[tauri::command]
+pub async fn convert_pdf_to_excel(
+    app: AppHandle,
+    job_id: String,
+    request: PdfToExcelRequest,
+) -> Result<ConversionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        conversion_service::execute_pdf_to_excel(app, job_id, request)
+    })
+    .await
+    .map_err(|e| format!("Task execution error: {}", e))?
+    .map_err(|e| e.to_string())
+}
+
 
 
 

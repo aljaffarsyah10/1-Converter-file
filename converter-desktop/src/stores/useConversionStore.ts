@@ -16,6 +16,7 @@ import {
   executeTauriCompressPdf,
   executeTauriExcelToPdf,
   executeTauriPptxToPdf,
+  executeTauriPdfToExcel,
   getDefaultOutputDir,
 } from "@/services/tauriConversionService";
 
@@ -48,6 +49,7 @@ interface ConversionStoreState {
   updateCompressPdfOptions: (opts: Partial<Extract<ToolOptionsState, { type: "compress-pdf" }>["options"]>) => void;
   updateExcelOptions: (opts: Partial<Extract<ToolOptionsState, { type: "excel-to-pdf" }>["options"]>) => void;
   updatePptxOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pptx-to-pdf" }>["options"]>) => void;
+  updatePdfToExcelOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pdf-to-excel" }>["options"]>) => void;
 
   startConversion: (toolId: string) => Promise<void>;
   cancelConversion: () => void;
@@ -195,6 +197,15 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           },
         };
         break;
+      case "pdf-to-excel":
+        optionsState = {
+          type: "pdf-to-excel",
+          options: {
+            outputFileName: "extracted_tables.xlsx",
+            openAfterConvert: true,
+          },
+        };
+        break;
       default:
         optionsState = {
           type: "merge-pdf",
@@ -311,6 +322,18 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
   updatePptxOptions: (opts) => {
     set((state) => {
       if (state.optionsState.type !== "pptx-to-pdf") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  updatePdfToExcelOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "pdf-to-excel") return state;
       return {
         optionsState: {
           ...state.optionsState,
@@ -518,6 +541,21 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
                   openAfterConvert: true,
                 };
           res = await executeTauriPptxToPdf(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress
+          );
+          break;
+        }
+        case "pdf-to-excel": {
+          const opts =
+            optionsState.type === "pdf-to-excel"
+              ? optionsState.options
+              : {
+                  outputFileName: "extracted_tables.xlsx",
+                  openAfterConvert: true,
+                };
+          res = await executeTauriPdfToExcel(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
             onProgress

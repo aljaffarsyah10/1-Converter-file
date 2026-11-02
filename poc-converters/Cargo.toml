@@ -9,6 +9,7 @@ image = { version = "0.25", default-features = false, features = ["jpeg", "png",
 flate2 = "1.0"
 docx-rs = "0.4.22"
 pdf-render = "1.2.0"
+rust_xlsxwriter = "0.80"
 
 [[bin]]
 name = "poc_merge"
@@ -37,4 +38,16 @@ path = "src/bin/poc_pdf_to_image.rs"
 [[bin]]
 name = "poc_compress_pdf"
 path = "src/bin/poc_compress_pdf.rs"
+
+[[bin]]
+name = "poc_excel_to_pdf"
+path = "src/bin/poc_excel_to_pdf.rs"
+
+[[bin]]
+name = "poc_pptx_to_pdf"
+path = "src/bin/poc_pptx_to_pdf.rs"
+
+[[bin]]
+name = "poc_pdf_to_excel"
+path = "src/bin/poc_pdf_to_excel.rs"
 

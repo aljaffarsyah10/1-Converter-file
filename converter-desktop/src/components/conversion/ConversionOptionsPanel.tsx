@@ -20,6 +20,7 @@ interface ConversionOptionsPanelProps {
   onUpdateCompress?: (opts: { outputFileName?: string; level?: "low" | "medium" | "high" }) => void;
   onUpdateExcel?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
   onUpdatePptx?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
+  onUpdatePdfToExcel?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
 }
 
 export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
@@ -37,6 +38,7 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   onUpdateCompress,
   onUpdateExcel,
   onUpdatePptx,
+  onUpdatePdfToExcel,
 }) => {
   return (
     <Card className="border shadow-sm">
@@ -432,6 +434,28 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
               Mengonversi slide presentasi PPTX atau PPT menjadi halaman PDF berkualitas tinggi secara offline.
+            </p>
+          </div>
+        )}
+        {/* 10. PDF to Excel Options */}
+        {toolId === "pdf-to-excel" && optionsState.type === "pdf-to-excel" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Output (.xlsx)
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdatePdfToExcel?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="extracted_tables.xlsx"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Mengekstrak baris & tabel data dari dokumen PDF ke dalam spreadsheet Excel secara 100% offline.
             </p>
           </div>
         )}

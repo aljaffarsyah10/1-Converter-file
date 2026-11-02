@@ -4,6 +4,7 @@ pub mod image_to_pdf;
 pub mod pdf_compress;
 pub mod pdf_merge;
 pub mod pdf_split;
+pub mod pdf_to_excel;
 pub mod pdf_to_image;
 pub mod pdf_to_word;
 pub mod pptx_to_pdf;

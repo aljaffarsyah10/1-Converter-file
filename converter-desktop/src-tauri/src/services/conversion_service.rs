@@ -1,12 +1,12 @@
 use crate::converters::{
-    docx_to_pdf, excel_to_pdf, image_to_pdf, pdf_compress, pdf_merge, pdf_split, pdf_to_image,
-    pdf_to_word, pptx_to_pdf,
+    docx_to_pdf, excel_to_pdf, image_to_pdf, pdf_compress, pdf_merge, pdf_split, pdf_to_excel,
+    pdf_to_image, pdf_to_word, pptx_to_pdf,
 };
 use crate::errors::AppError;
 use crate::models::{
     CompressPdfRequest, ConversionResult, ExcelToPdfRequest, ImageToPdfRequest, MergePdfRequest,
-    PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, ProgressEvent, SplitPdfRequest,
-    WordToPdfRequest,
+    PdfToExcelRequest, PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, ProgressEvent,
+    SplitPdfRequest, WordToPdfRequest,
 };
 use tauri::{AppHandle, Emitter};
 
@@ -135,6 +135,18 @@ pub fn execute_pptx_to_pdf(
     emit_progress(&app, &job_id, 100, "Konversi PowerPoint ke PDF selesai");
     Ok(result)
 }
+
+pub fn execute_pdf_to_excel(
+    app: AppHandle,
+    job_id: String,
+    req: PdfToExcelRequest,
+) -> Result<ConversionResult, AppError> {
+    emit_progress(&app, &job_id, 15, "Menganalisis tabel & mengekstrak data PDF...");
+    let result = pdf_to_excel::convert_pdf_to_excel(&req.input_path, &req.output_path)?;
+    emit_progress(&app, &job_id, 100, "Konversi PDF ke Excel selesai");
+    Ok(result)
+}
+
 
 
 
