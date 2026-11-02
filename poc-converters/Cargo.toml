@@ -1,0 +1,25 @@
+[package]
+name = "poc-converters"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lopdf = "0.35.0"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
+flate2 = "1.0"
+
+[[bin]]
+name = "poc_merge"
+path = "src/bin/poc_merge.rs"
+
+[[bin]]
+name = "poc_split"
+path = "src/bin/poc_split.rs"
+
+[[bin]]
+name = "poc_img2pdf"
+path = "src/bin/poc_img2pdf.rs"
+
+[[bin]]
+name = "poc_docx2pdf"
+path = "src/bin/poc_docx2pdf.rs"

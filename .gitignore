@@ -9,6 +9,7 @@ dist-ssr/
 target/
 **/target/
 **/gen/schemas/
+poc-converters/output/
 
 # Logs
 *.log
@@ -16,4 +17,3 @@ target/
 # IDE
 .vscode/
 .idea/
-
