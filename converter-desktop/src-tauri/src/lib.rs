@@ -5,7 +5,7 @@ pub mod models;
 pub mod services;
 
 use commands::convert::{
-    convert_compress_pdf, convert_excel_to_pdf, convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_image, convert_pdf_to_word, convert_split_pdf, convert_word_to_pdf,
+    convert_compress_pdf, convert_excel_to_pdf, convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_image, convert_pdf_to_word, convert_pptx_to_pdf, convert_split_pdf, convert_word_to_pdf,
 };
 use commands::system::{get_default_output_dir, get_files_metadata, get_system_engine_info};
 
@@ -30,6 +30,7 @@ pub fn run() {
             convert_pdf_to_image,
             convert_compress_pdf,
             convert_excel_to_pdf,
+            convert_pptx_to_pdf,
             get_system_engine_info,
             get_default_output_dir,
             get_files_metadata,
@@ -754,6 +755,75 @@ mod tests {
             &out3.to_string_lossy(),
         );
         assert!(res_txt.is_err(), "Unsupported format must fail");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_pptx_to_pdf_success() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample_pptx = fixtures_dir.join("sample.pptx").to_string_lossy().to_string();
+        if !Path::new(&sample_pptx).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_pptx_to_pdf_success");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("pptx_converted.pdf");
+
+        let res = converters::pptx_to_pdf::convert_pptx_to_pdf(
+            &sample_pptx,
+            &out_pdf.to_string_lossy(),
+        );
+        assert!(res.is_ok(), "Convert PPTX to PDF should succeed: {:?}", res.err());
+        let result = res.unwrap();
+        assert!(result.success);
+        assert!(out_pdf.exists());
+        assert!(result.total_pages >= 1);
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_pptx_to_pdf_invalid_inputs() {
+        let temp_dir = std::env::temp_dir().join("test_pptx_to_pdf_invalid");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        // 1. Non-existent file
+        let fake = "C:\\path\\does_not_exist_xyz.pptx";
+        let out1 = temp_dir.join("out1.pdf");
+        let res_fake = converters::pptx_to_pdf::convert_pptx_to_pdf(
+            fake,
+            &out1.to_string_lossy(),
+        );
+        assert!(res_fake.is_err(), "Non existent file must fail");
+
+        // 2. Unsupported format
+        let txt_file = temp_dir.join("presentation.txt");
+        fs::write(&txt_file, b"presentation").expect("write txt");
+        let out2 = temp_dir.join("out2.pdf");
+        let res_txt = converters::pptx_to_pdf::convert_pptx_to_pdf(
+            &txt_file.to_string_lossy(),
+            &out2.to_string_lossy(),
+        );
+        assert!(res_txt.is_err(), "Unsupported format must fail");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_pptx_to_pdf_corrupted_empty() {
+        let temp_dir = std::env::temp_dir().join("test_pptx_to_pdf_empty");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        let empty_pptx = temp_dir.join("empty.pptx");
+        fs::write(&empty_pptx, b"").expect("write empty");
+        let out = temp_dir.join("out_empty.pdf");
+        let res_empty = converters::pptx_to_pdf::convert_pptx_to_pdf(
+            &empty_pptx.to_string_lossy(),
+            &out.to_string_lossy(),
+        );
+        assert!(res_empty.is_err(), "0-byte PPTX must fail");
 
         let _ = fs::remove_dir_all(temp_dir);
     }

@@ -60,6 +60,12 @@ export interface ExcelToPdfOptions {
   openAfterConvert: boolean;
 }
 
+export interface PptxToPdfOptions {
+  outputFileName: string;
+  outputDir?: string;
+  openAfterConvert: boolean;
+}
+
 export type ToolOptionsState =
   | { type: "merge-pdf"; options: MergePdfOptions }
   | { type: "split-pdf"; options: SplitPdfOptions }
@@ -68,7 +74,8 @@ export type ToolOptionsState =
   | { type: "pdf-to-word"; options: PdfToWordOptions }
   | { type: "pdf-to-image"; options: PdfToImageOptions }
   | { type: "compress-pdf"; options: CompressPdfOptions }
-  | { type: "excel-to-pdf"; options: ExcelToPdfOptions };
+  | { type: "excel-to-pdf"; options: ExcelToPdfOptions }
+  | { type: "pptx-to-pdf"; options: PptxToPdfOptions };
 
 export type ConversionStatus =
   | "idle"

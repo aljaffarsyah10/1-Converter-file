@@ -363,9 +363,9 @@ Buat file `converters/pptx_to_pdf.rs`:
 ### 5.3 Integrasi & Testing
 
 **Acceptance Criteria Fase 5:**
-- [ ] Konversi PPTX/PPT → PDF berhasil
-- [ ] 3 unit test lulus
-- [ ] Semua fitur sebelumnya tetap berjalan
+- [x] Konversi PPTX/PPT → PDF berhasil (`pptx_to_pdf.rs`, `poc_pptx_to_pdf.rs`)
+- [x] 3 unit test lulus (`test_pptx_to_pdf_success`, `test_pptx_to_pdf_invalid_inputs`, `test_pptx_to_pdf_corrupted_empty`)
+- [x] Semua fitur sebelumnya tetap berjalan (`cargo test` 30/30 test lulus)
 
 **Git checkpoint:**
 ```powershell

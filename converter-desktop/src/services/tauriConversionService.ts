@@ -16,6 +16,7 @@ import {
   PdfToImageOptions,
   CompressPdfOptions,
   ExcelToPdfOptions,
+  PptxToPdfOptions,
 } from "@/types/conversion";
 
 interface BackendConversionResult {
@@ -607,6 +608,62 @@ export async function executeTauriCompressPdf(
       compressedSizeBytes: result.compressedSizeBytes,
       reductionPercent: result.reductionPercent,
     };
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}
+
+export async function executeTauriPptxToPdf(
+  file: StagedFile,
+  options: PptxToPdfOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-pptx-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const baseName =
+      options.outputFileName.replace(/\.pdf$/i, "") ||
+      file.name.replace(/\.(pptx|ppt)$/i, "");
+    const outputPath = `${outDir}\\${baseName}.pdf`;
+
+    const result = await invoke<BackendConversionResult>("convert_pptx_to_pdf", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputPath,
+      },
+    });
+
+    const convResult: ConversionResult = {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: result.totalPages,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+    };
+
+    if (options.openAfterConvert) {
+      try {
+        await openResultFile(convResult.outputPath);
+      } catch {
+        // Non-blocking
+      }
+    }
+
+    return convResult;
   } catch (err) {
     throw parseBackendError(err);
   } finally {
