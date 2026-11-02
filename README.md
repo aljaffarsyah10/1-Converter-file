@@ -252,13 +252,18 @@ Seluruh fitur telah diverifikasi melalui pengujian otomatis pada [`06-TEST_REPOR
 
 Untuk mempelajari detail perancangan teknis dan laporan tiap tahapan, silakan baca dokumen berikut:
 
-- [`01-PRODUCT_BRIEF.md`](01-PRODUCT_BRIEF.md): Visi awal produk dan batasan ruang lingkup.
-- [`02-PRD_AND_PLAYBOOK.md`](02-PRD_AND_PLAYBOOK.md): Panduan utama PRD dan metodologi playbook 10 fase.
-- [`03-TECHNICAL_PLANNING_GUIDE.md`](03-TECHNICAL_PLANNING_GUIDE.md): Pedoman teknis sebelum implementasi.
-- [`04-TECHNICAL_PLAN.md`](04-TECHNICAL_PLAN.md): Rencana arsitektur teknis, IPC contracts, dan pemilihan engine.
-- [`05-POC_VALIDATION_REPORT.md`](05-POC_VALIDATION_REPORT.md): Laporan validasi PoC konversi engine.
-- [`06-TEST_REPORT.md`](06-TEST_REPORT.md): Laporan pengujian kualitas dan keandalan 15 skenario.
-- [`07-RELEASE_NOTES.md`](07-RELEASE_NOTES.md): Catatan rilis v1.0.0 dan panduan pengguna.
+### 📁 v1.0 — MVP (Selesai)
+- [`01-PRODUCT_BRIEF.md`](docs/v1.0-mvp/01-PRODUCT_BRIEF.md): Visi awal produk dan batasan ruang lingkup.
+- [`02-PRD_AND_PLAYBOOK.md`](docs/v1.0-mvp/02-PRD_AND_PLAYBOOK.md): Panduan utama PRD dan metodologi playbook 10 fase.
+- [`03-TECHNICAL_PLANNING_GUIDE.md`](docs/v1.0-mvp/03-TECHNICAL_PLANNING_GUIDE.md): Pedoman teknis sebelum implementasi.
+- [`04-TECHNICAL_PLAN.md`](docs/v1.0-mvp/04-TECHNICAL_PLAN.md): Rencana arsitektur teknis, IPC contracts, dan pemilihan engine.
+- [`05-POC_VALIDATION_REPORT.md`](docs/v1.0-mvp/05-POC_VALIDATION_REPORT.md): Laporan validasi PoC konversi engine.
+- [`06-TEST_REPORT.md`](docs/v1.0-mvp/06-TEST_REPORT.md): Laporan pengujian kualitas dan keandalan 15 skenario.
+- [`07-RELEASE_NOTES.md`](docs/v1.0-mvp/07-RELEASE_NOTES.md): Catatan rilis v1.0.0 dan panduan pengguna.
+
+### 📁 v1.1 — Expansion (Sedang Berjalan)
+- [`01-RINGKASAN_PROJECT.md`](docs/v1.1-expansion/01-RINGKASAN_PROJECT.md): Ringkasan eksekutif project dengan roadmap 19 fitur.
+- [`02-PRD_AND_PLAYBOOK.md`](docs/v1.1-expansion/02-PRD_AND_PLAYBOOK.md): PRD & playbook 14 fase untuk 15 fitur baru.
 
 ---
 
