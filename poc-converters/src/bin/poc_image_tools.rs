@@ -68,3 +68,4 @@ fn main() {
 
     println!("All image tool operations completed successfully!");
 }
+

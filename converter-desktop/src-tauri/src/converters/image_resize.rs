@@ -81,3 +81,4 @@ pub fn resize_image_file(
         ..Default::default()
     })
 }
+

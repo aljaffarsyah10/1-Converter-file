@@ -104,3 +104,4 @@ pub fn compress_image_file(
         reduction_percent: Some((reduction * 10.0).round() / 10.0),
     })
 }
+
