@@ -215,3 +215,4 @@ Rangkaian pengujian pada **Fase 13 (Regression Testing & Stabilitas)** telah ter
 - ✅ **Stabilitas Concurrency Teruji**.
 
 Aplikasi **File Converter Desktop** telah siap untuk memasuki **FASE 14 — Build, Packaging & Release Notes (v1.1.0)**.
+
