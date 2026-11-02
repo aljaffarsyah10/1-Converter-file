@@ -260,3 +260,4 @@ Konversi DOCX ke PDF memerlukan tata letak dokumen (*typesetting & text reflow e
 
 ## 11. Kesimpulan & Rencana Aksi Phase Berikutnya
 Dokumen ini menetapkan seluruh fondasi teknis yang dibutuhkan untuk masuk ke **PHASE 4 — Conversion Engine Proof of Concept**, di mana setiap modul engine P0 (`lopdf`, `image`, dan subprocess `docx`) akan diuji secara nyata dengan berkas sampel terverifikasi.
+
