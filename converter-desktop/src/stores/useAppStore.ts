@@ -1,12 +1,35 @@
 import { create } from "zustand";
+import { AppPage } from "@/types/navigation";
 
 interface AppState {
-  currentTool: string | null;
-  setCurrentTool: (tool: string | null) => void;
+  currentPage: AppPage;
+  selectedToolId: string | null;
+  theme: "light" | "dark" | "system";
+  defaultOutputPath: string;
+  navigateTo: (page: AppPage, toolId?: string | null) => void;
+  openWorkspace: (toolId: string) => void;
+  setTheme: (theme: "light" | "dark" | "system") => void;
+  setDefaultOutputPath: (path: string) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  currentTool: null,
-  setCurrentTool: (tool) => set({ currentTool: tool }),
-}));
+  currentPage: "dashboard",
+  selectedToolId: null,
+  theme: "system",
+  defaultOutputPath: "Downloads/Converted",
 
+  navigateTo: (page, toolId = null) =>
+    set({
+      currentPage: page,
+      selectedToolId: toolId,
+    }),
+
+  openWorkspace: (toolId) =>
+    set({
+      currentPage: "workspace",
+      selectedToolId: toolId,
+    }),
+
+  setTheme: (theme) => set({ theme }),
+  setDefaultOutputPath: (path) => set({ defaultOutputPath: path }),
+}));
