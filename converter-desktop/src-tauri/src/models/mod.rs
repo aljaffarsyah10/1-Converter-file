@@ -63,6 +63,15 @@ pub struct PdfToExcelRequest {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct RotatePdfRequest {
+    pub input_path: String,
+    pub output_path: String,
+    pub angle: i64,
+    pub page_range: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct PdfToImageRequest {
     pub input_path: String,
     pub output_dir: String,

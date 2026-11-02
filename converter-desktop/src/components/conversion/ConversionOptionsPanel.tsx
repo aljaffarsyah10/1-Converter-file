@@ -53,6 +53,11 @@ interface ConversionOptionsPanelProps {
     outputFileName?: string;
     openAfterConvert?: boolean;
   }) => void;
+  onUpdateRotate?: (opts: {
+    outputFileName?: string;
+    angle?: 90 | 180 | 270;
+    pageRange?: string;
+  }) => void;
 }
 
 export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
@@ -71,6 +76,7 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   onUpdateExcel,
   onUpdatePptx,
   onUpdatePdfToExcel,
+  onUpdateRotate,
 }) => {
   return (
     <Card className="border shadow-sm">
@@ -554,6 +560,67 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
               Mengekstrak baris & tabel data dari dokumen PDF ke dalam
               spreadsheet Excel secara 100% offline.
+            </p>
+          </div>
+        )}
+        {/* 11. Rotate PDF Options */}
+        {toolId === "rotate-pdf" && optionsState.type === "rotate-pdf" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Sudut Rotasi
+              </label>
+              <div className="grid grid-cols-3 gap-1">
+                {[
+                  { angle: 90 as const, label: "90° Kanan", desc: "Searah Jarum Jam" },
+                  { angle: 180 as const, label: "180° Balik", desc: "Terbalik" },
+                  { angle: 270 as const, label: "90° Kiri", desc: "Berlawanan" },
+                ].map((item) => (
+                  <Button
+                    key={item.angle}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.angle === item.angle ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-10 flex flex-col items-center justify-center text-xs p-1"
+                    onClick={() => onUpdateRotate?.({ angle: item.angle })}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Halaman yang Diputar (Opsional)
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.pageRange || ""}
+                onChange={(e) => onUpdateRotate?.({ pageRange: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="Contoh: 1, 3-5 (kosongkan untuk semua halaman)"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Hasil (.pdf)
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdateRotate?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="rotated_document.pdf"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Memutar orientasi tampilan halaman PDF tanpa menurunkan kualitas berkas asli.
             </p>
           </div>
         )}

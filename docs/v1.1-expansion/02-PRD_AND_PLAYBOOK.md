@@ -441,9 +441,10 @@ Panel opsi:
 - Scope: Semua halaman / Halaman tertentu (input rentang)
 
 **Acceptance Criteria Fase 7:**
-- [ ] Rotasi halaman PDF berfungsi
-- [ ] 3 unit test lulus
-- [ ] UI dengan opsi sudut & scope berfungsi
+- [x] Rotasi halaman PDF berfungsi (`pdf_rotate.rs`, `poc_rotate_pdf.rs`)
+- [x] 3 unit test lulus (`test_rotate_pdf_all_pages_90`, `test_rotate_pdf_specific_page`, `test_rotate_pdf_invalid_inputs`)
+- [x] UI dengan opsi sudut (90° Kanan, 180° Balik, 90° Kiri/270°) & rentang halaman berfungsi
+- [x] Semua fitur sebelumnya tetap berjalan (`cargo test` 36/36 test lulus)
 
 **Git checkpoint:**
 ```powershell

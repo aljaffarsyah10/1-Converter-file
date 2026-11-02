@@ -18,6 +18,7 @@ import {
   ExcelToPdfOptions,
   PptxToPdfOptions,
   PdfToExcelOptions,
+  RotatePdfOptions,
 } from "@/types/conversion";
 
 interface BackendConversionResult {
@@ -721,6 +722,54 @@ export async function executeTauriPdfToExcel(
     }
 
     return convResult;
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}
+
+export async function executeTauriRotatePdf(
+  file: StagedFile,
+  options: RotatePdfOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-rotate-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const baseName =
+      options.outputFileName.replace(/\.pdf$/i, "") ||
+      file.name.replace(/\.pdf$/i, "") + "-rotated";
+    const outputPath = `${outDir}\\${baseName}.pdf`;
+
+    const result = await invoke<BackendConversionResult>("convert_rotate_pdf", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputPath,
+        angle: options.angle,
+        pageRange: options.pageRange?.trim() ? options.pageRange.trim() : null,
+      },
+    });
+
+    return {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: result.totalPages,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+    };
   } catch (err) {
     throw parseBackendError(err);
   } finally {

@@ -72,6 +72,13 @@ export interface PdfToExcelOptions {
   openAfterConvert: boolean;
 }
 
+export interface RotatePdfOptions {
+  outputFileName: string;
+  outputDir?: string;
+  angle: 90 | 180 | 270;
+  pageRange?: string;
+}
+
 export type ToolOptionsState =
   | { type: "merge-pdf"; options: MergePdfOptions }
   | { type: "split-pdf"; options: SplitPdfOptions }
@@ -82,7 +89,8 @@ export type ToolOptionsState =
   | { type: "compress-pdf"; options: CompressPdfOptions }
   | { type: "excel-to-pdf"; options: ExcelToPdfOptions }
   | { type: "pptx-to-pdf"; options: PptxToPdfOptions }
-  | { type: "pdf-to-excel"; options: PdfToExcelOptions };
+  | { type: "pdf-to-excel"; options: PdfToExcelOptions }
+  | { type: "rotate-pdf"; options: RotatePdfOptions };
 
 export type ConversionStatus =
   | "idle"

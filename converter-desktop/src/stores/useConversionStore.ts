@@ -17,6 +17,7 @@ import {
   executeTauriExcelToPdf,
   executeTauriPptxToPdf,
   executeTauriPdfToExcel,
+  executeTauriRotatePdf,
   getDefaultOutputDir,
 } from "@/services/tauriConversionService";
 
@@ -84,6 +85,11 @@ interface ConversionStoreState {
   updatePdfToExcelOptions: (
     opts: Partial<
       Extract<ToolOptionsState, { type: "pdf-to-excel" }>["options"]
+    >,
+  ) => void;
+  updateRotateOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "rotate-pdf" }>["options"]
     >,
   ) => void;
 
@@ -245,6 +251,16 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           },
         };
         break;
+      case "rotate-pdf":
+        optionsState = {
+          type: "rotate-pdf",
+          options: {
+            outputFileName: "rotated_document.pdf",
+            angle: 90,
+            pageRange: "",
+          },
+        };
+        break;
       default:
         optionsState = {
           type: "merge-pdf",
@@ -373,6 +389,18 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
   updatePdfToExcelOptions: (opts) => {
     set((state) => {
       if (state.optionsState.type !== "pdf-to-excel") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  updateRotateOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "rotate-pdf") return state;
       return {
         optionsState: {
           ...state.optionsState,
@@ -596,6 +624,22 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
                   openAfterConvert: true,
                 };
           res = await executeTauriPdfToExcel(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress,
+          );
+          break;
+        }
+        case "rotate-pdf": {
+          const opts =
+            optionsState.type === "rotate-pdf"
+              ? optionsState.options
+              : {
+                  outputFileName: "rotated_document.pdf",
+                  angle: 90 as const,
+                  pageRange: "",
+                };
+          res = await executeTauriRotatePdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
             onProgress,

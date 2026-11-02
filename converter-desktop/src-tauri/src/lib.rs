@@ -5,7 +5,7 @@ pub mod models;
 pub mod services;
 
 use commands::convert::{
-    convert_compress_pdf, convert_excel_to_pdf, convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_excel, convert_pdf_to_image, convert_pdf_to_word, convert_pptx_to_pdf, convert_split_pdf, convert_word_to_pdf,
+    convert_compress_pdf, convert_excel_to_pdf, convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_excel, convert_pdf_to_image, convert_pdf_to_word, convert_pptx_to_pdf, convert_rotate_pdf, convert_split_pdf, convert_word_to_pdf,
 };
 use commands::system::{get_default_output_dir, get_files_metadata, get_system_engine_info};
 
@@ -32,6 +32,7 @@ pub fn run() {
             convert_excel_to_pdf,
             convert_pptx_to_pdf,
             convert_pdf_to_excel,
+            convert_rotate_pdf,
             get_system_engine_info,
             get_default_output_dir,
             get_files_metadata,
@@ -894,6 +895,121 @@ mod tests {
             &out.to_string_lossy(),
         );
         assert!(res_empty.is_err(), "0-byte PDF must fail");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_rotate_pdf_all_pages_90() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_rotate_pdf_all_90");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("rotated_90.pdf");
+
+        let res = converters::pdf_rotate::rotate_pdf_pages(
+            &sample1,
+            &out_pdf.to_string_lossy(),
+            90,
+            None,
+        );
+        assert!(res.is_ok(), "Rotate PDF should succeed: {:?}", res.err());
+        let result = res.unwrap();
+        assert!(result.success);
+        assert_eq!(result.total_pages, 2);
+
+        // Verify rotation attribute
+        let doc = lopdf::Document::load(&out_pdf).expect("load rotated");
+        for (_num, id) in doc.get_pages() {
+            let obj = doc.get_object(id).unwrap();
+            let dict = obj.as_dict().unwrap();
+            let rot = dict.get(b"Rotate").and_then(|v| v.as_i64()).unwrap_or(0);
+            assert_eq!(rot, 90);
+        }
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_rotate_pdf_specific_page() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_rotate_pdf_p1");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("rotated_p1.pdf");
+
+        let res = converters::pdf_rotate::rotate_pdf_pages(
+            &sample1,
+            &out_pdf.to_string_lossy(),
+            180,
+            Some("1"),
+        );
+        assert!(res.is_ok(), "Rotate specific page should succeed: {:?}", res.err());
+
+        // Verify page 1 is 180 and page 2 is 0
+        let doc = lopdf::Document::load(&out_pdf).expect("load rotated");
+        let pages = doc.get_pages();
+        let p1_id = pages.get(&1).unwrap();
+        let p2_id = pages.get(&2).unwrap();
+
+        let rot1 = doc.get_object(*p1_id).unwrap().as_dict().unwrap().get(b"Rotate").and_then(|v| v.as_i64()).unwrap_or(0);
+        let rot2 = doc.get_object(*p2_id).unwrap().as_dict().unwrap().get(b"Rotate").and_then(|v| v.as_i64()).unwrap_or(0);
+
+        assert_eq!(rot1, 180);
+        assert_eq!(rot2, 0);
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_rotate_pdf_invalid_inputs() {
+        let temp_dir = std::env::temp_dir().join("test_rotate_pdf_invalid");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        // 1. Non-existent file
+        let fake = "C:\\path\\does_not_exist_xyz.pdf";
+        let out1 = temp_dir.join("out1.pdf");
+        let res_fake = converters::pdf_rotate::rotate_pdf_pages(
+            fake,
+            &out1.to_string_lossy(),
+            90,
+            None,
+        );
+        assert!(res_fake.is_err(), "Non existent file must fail");
+
+        // 2. 0-byte file
+        let empty_pdf = temp_dir.join("empty.pdf");
+        fs::write(&empty_pdf, b"").expect("write empty");
+        let out2 = temp_dir.join("out2.pdf");
+        let res_empty = converters::pdf_rotate::rotate_pdf_pages(
+            &empty_pdf.to_string_lossy(),
+            &out2.to_string_lossy(),
+            90,
+            None,
+        );
+        assert!(res_empty.is_err(), "0-byte PDF must fail");
+
+        // 3. Out-of-bounds page range
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if Path::new(&sample1).exists() {
+            let out3 = temp_dir.join("out3.pdf");
+            let res_oob = converters::pdf_rotate::rotate_pdf_pages(
+                &sample1,
+                &out3.to_string_lossy(),
+                90,
+                Some("99"),
+            );
+            assert!(res_oob.is_err(), "Page 99 on 2-page PDF must fail");
+        }
 
         let _ = fs::remove_dir_all(temp_dir);
     }

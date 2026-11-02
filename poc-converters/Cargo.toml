@@ -51,3 +51,7 @@ path = "src/bin/poc_pptx_to_pdf.rs"
 name = "poc_pdf_to_excel"
 path = "src/bin/poc_pdf_to_excel.rs"
 
+[[bin]]
+name = "poc_rotate_pdf"
+path = "src/bin/poc_rotate_pdf.rs"
+
