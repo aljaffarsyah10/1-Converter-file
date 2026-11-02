@@ -13,6 +13,7 @@ import {
   SystemEngineInfo,
   WordToPdfOptions,
   PdfToWordOptions,
+  PdfToImageOptions,
 } from "@/types/conversion";
 
 interface BackendConversionResult {
@@ -437,6 +438,53 @@ export async function executeTauriPdfToWord(
         console.warn("Could not automatically open converted DOCX:", e);
       }
     }
+
+    return {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: result.totalPages,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+    };
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}
+
+export async function executeTauriPdfToImage(
+  file: StagedFile,
+  options: PdfToImageOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-pdf2img-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const outputPrefix = options.outputPrefix || "page";
+
+    const result = await invoke<BackendConversionResult>("convert_pdf_to_image", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputDir: outDir,
+        outputPrefix,
+        format: options.format,
+        dpi: options.dpi,
+        pageRange: options.pageRange?.trim() ? options.pageRange.trim() : null,
+      },
+    });
 
     return {
       outputPath: result.outputPath,

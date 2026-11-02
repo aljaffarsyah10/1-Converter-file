@@ -5,7 +5,7 @@ pub mod models;
 pub mod services;
 
 use commands::convert::{
-    convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_word, convert_split_pdf, convert_word_to_pdf,
+    convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_image, convert_pdf_to_word, convert_split_pdf, convert_word_to_pdf,
 };
 use commands::system::{get_default_output_dir, get_files_metadata, get_system_engine_info};
 
@@ -27,6 +27,7 @@ pub fn run() {
             convert_image_to_pdf,
             convert_word_to_pdf,
             convert_pdf_to_word,
+            convert_pdf_to_image,
             get_system_engine_info,
             get_default_output_dir,
             get_files_metadata,
@@ -456,6 +457,120 @@ mod tests {
         let out3 = temp_dir.join("out3.docx").to_string_lossy().to_string();
         let res3 = converters::pdf_to_word::convert_pdf_to_docx(&corrupt_pdf.to_string_lossy(), &out3);
         assert!(res3.is_err(), "Corrupt PDF must fail gracefully without panic");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_pdf_to_image_png_success() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+
+        if !Path::new(&sample1).exists() {
+            println!("Fixtures not found, skipping pdf to image test");
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_pdf_to_image_png");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        let res = converters::pdf_to_image::convert_pdf_to_images(
+            &sample1,
+            &temp_dir.to_string_lossy(),
+            Some("test_png"),
+            Some("png"),
+            Some(150),
+            None,
+        );
+        assert!(res.is_ok(), "PDF to Image PNG should succeed: {:?}", res.err());
+        let result = res.unwrap();
+        assert!(result.success);
+        assert_eq!(result.total_pages, 2);
+        assert!(result.file_size_bytes > 0);
+
+        let page1 = temp_dir.join("test_png_page_1.png");
+        let page2 = temp_dir.join("test_png_page_2.png");
+        assert!(page1.exists(), "Page 1 PNG must exist");
+        assert!(page2.exists(), "Page 2 PNG must exist");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_pdf_to_image_jpg_single_page() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_pdf_to_image_jpg");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        let res = converters::pdf_to_image::convert_pdf_to_images(
+            &sample1,
+            &temp_dir.to_string_lossy(),
+            Some("test_jpg"),
+            Some("jpg"),
+            Some(150),
+            Some("2"),
+        );
+        assert!(res.is_ok(), "Single page PDF to JPG should succeed: {:?}", res.err());
+        let result = res.unwrap();
+        assert!(result.success);
+        assert_eq!(result.total_pages, 1);
+
+        let page2 = temp_dir.join("test_jpg_page_2.jpg");
+        assert!(page2.exists(), "Page 2 JPG must exist");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_pdf_to_image_invalid_inputs() {
+        let temp_dir = std::env::temp_dir().join("test_pdf_to_image_invalid");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        // 1. Non-existent file
+        let fake = "C:\\path\\does_not_exist_xyz.pdf";
+        let res_fake = converters::pdf_to_image::convert_pdf_to_images(
+            fake,
+            &temp_dir.to_string_lossy(),
+            None,
+            None,
+            None,
+            None,
+        );
+        assert!(res_fake.is_err(), "Non existent file must return Err");
+
+        // 2. 0-byte file
+        let empty_pdf = temp_dir.join("empty.pdf");
+        fs::write(&empty_pdf, b"").expect("write empty");
+        let res_empty = converters::pdf_to_image::convert_pdf_to_images(
+            &empty_pdf.to_string_lossy(),
+            &temp_dir.to_string_lossy(),
+            None,
+            None,
+            None,
+            None,
+        );
+        assert!(res_empty.is_err(), "0-byte PDF must fail gracefully");
+
+        // 3. Out of bounds range
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if Path::new(&sample1).exists() {
+            let res_oob = converters::pdf_to_image::convert_pdf_to_images(
+                &sample1,
+                &temp_dir.to_string_lossy(),
+                None,
+                None,
+                None,
+                Some("99"),
+            );
+            assert!(res_oob.is_err(), "Page 99 on 2-page PDF must return Err");
+        }
 
         let _ = fs::remove_dir_all(temp_dir);
     }

@@ -228,11 +228,11 @@ Model request harus mencakup: `input_path`, `output_dir`, `format` (PNG/JPG), `d
 - Verifikasi kualitas gambar output.
 
 **Acceptance Criteria Fase 2:**
-- [ ] PoC rendering PDF → gambar berfungsi dengan kualitas baik
-- [ ] Rust converter + 3 unit test lulus
-- [ ] Tauri command terintegrasi
-- [ ] UI workspace dengan opsi format/DPI/range berfungsi
-- [ ] Semua fitur sebelumnya tetap berjalan
+- [x] PoC rendering PDF → gambar berfungsi dengan kualitas baik (`poc-converters/src/bin/poc_pdf_to_image.rs`)
+- [x] Rust converter + 3 unit test lulus (`test_pdf_to_image_png_success`, `test_pdf_to_image_jpg_single_page`, `test_pdf_to_image_invalid_inputs`)
+- [x] Tauri command terintegrasi (`convert_pdf_to_image`)
+- [x] UI workspace dengan opsi format/DPI/range berfungsi (`ConversionOptionsPanel.tsx`, `tools.ts`)
+- [x] Semua fitur sebelumnya tetap berjalan (`cargo test` 21/21 test lulus)
 
 **Git checkpoint:**
 ```powershell

@@ -16,6 +16,7 @@ interface ConversionOptionsPanelProps {
   onUpdateImage: (opts: { orientation?: "auto" | "portrait" | "landscape"; pageSize?: "A4" | "FitImage"; margin?: "none" | "small" | "normal"; outputFileName?: string }) => void;
   onUpdateWord: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
   onUpdatePdfToWord?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
+  onUpdatePdfToImage?: (opts: { format?: "png" | "jpg"; dpi?: 150 | 300; pageRange?: string; outputPrefix?: string }) => void;
 }
 
 export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
@@ -29,6 +30,7 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   onUpdateImage,
   onUpdateWord,
   onUpdatePdfToWord,
+  onUpdatePdfToImage,
 }) => {
   return (
     <Card className="border shadow-sm">
@@ -253,6 +255,85 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
               Mengekstrak teks & struktur dokumen PDF menjadi berkas DOCX yang dapat diedit secara 100% offline.
+            </p>
+          </div>
+        )}
+        {/* 6. PDF to Image Options */}
+        {toolId === "pdf-to-image" && optionsState.type === "pdf-to-image" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Format Gambar
+              </label>
+              <div className="grid grid-cols-2 gap-1 p-1 bg-muted rounded-lg">
+                {(["png", "jpg"] as const).map((fmt) => (
+                  <Button
+                    key={fmt}
+                    type="button"
+                    variant={optionsState.options.format === fmt ? "default" : "ghost"}
+                    size="sm"
+                    disabled={disabled}
+                    className="h-7 text-xs uppercase"
+                    onClick={() => onUpdatePdfToImage?.({ format: fmt })}
+                  >
+                    {fmt}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Kualitas Resolusi (DPI)
+              </label>
+              <div className="grid grid-cols-2 gap-1 p-1 bg-muted rounded-lg">
+                {[
+                  { label: "150 DPI (Standar)", val: 150 as const },
+                  { label: "300 DPI (Tajam)", val: 300 as const },
+                ].map((item) => (
+                  <Button
+                    key={item.val}
+                    type="button"
+                    variant={optionsState.options.dpi === item.val ? "default" : "ghost"}
+                    size="sm"
+                    disabled={disabled}
+                    className="h-7 text-xs"
+                    onClick={() => onUpdatePdfToImage?.({ dpi: item.val })}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Rentang Halaman (Opsional)
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.pageRange || ""}
+                onChange={(e) => onUpdatePdfToImage?.({ pageRange: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="Contoh: 1-3, 5 (kosongkan untuk semua)"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Awalan Nama Berkas
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputPrefix}
+                onChange={(e) => onUpdatePdfToImage?.({ outputPrefix: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="page"
+              />
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Setiap halaman PDF akan diekstrak menjadi satu berkas gambar.
             </p>
           </div>
         )}

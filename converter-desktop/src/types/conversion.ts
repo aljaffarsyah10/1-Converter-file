@@ -40,12 +40,21 @@ export interface PdfToWordOptions {
   openAfterConvert: boolean;
 }
 
+export interface PdfToImageOptions {
+  outputPrefix: string;
+  outputDir?: string;
+  format: "png" | "jpg";
+  dpi: 150 | 300;
+  pageRange?: string;
+}
+
 export type ToolOptionsState =
   | { type: "merge-pdf"; options: MergePdfOptions }
   | { type: "split-pdf"; options: SplitPdfOptions }
   | { type: "image-to-pdf"; options: ImageToPdfOptions }
   | { type: "word-to-pdf"; options: WordToPdfOptions }
-  | { type: "pdf-to-word"; options: PdfToWordOptions };
+  | { type: "pdf-to-word"; options: PdfToWordOptions }
+  | { type: "pdf-to-image"; options: PdfToImageOptions };
 
 export type ConversionStatus =
   | "idle"

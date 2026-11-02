@@ -40,6 +40,17 @@ pub struct PdfToWordRequest {
     pub output_path: String,
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PdfToImageRequest {
+    pub input_path: String,
+    pub output_dir: String,
+    pub output_prefix: Option<String>,
+    pub format: Option<String>, // "png" or "jpg"
+    pub dpi: Option<u32>,       // 150, 300
+    pub page_range: Option<String>,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ConversionResult {

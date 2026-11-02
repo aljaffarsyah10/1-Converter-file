@@ -39,6 +39,7 @@ export const ToolWorkspacePage: React.FC = () => {
     updateImageOptions,
     updateWordOptions,
     updatePdfToWordOptions,
+    updatePdfToImageOptions,
     startConversion,
     cancelConversion,
     resetJob,
@@ -71,7 +72,7 @@ export const ToolWorkspacePage: React.FC = () => {
   const isProcessing = status === "processing" || status === "validating";
   const canReorder = tool.id === "merge-pdf" || tool.id === "image-to-pdf";
   const maxFiles =
-    tool.id === "split-pdf" || tool.id === "word-to-pdf" || tool.id === "pdf-to-word" ? 1 : undefined;
+    tool.id === "split-pdf" || tool.id === "word-to-pdf" || tool.id === "pdf-to-word" || tool.id === "pdf-to-image" ? 1 : undefined;
 
   return (
     <PageContainer>
@@ -124,6 +125,7 @@ export const ToolWorkspacePage: React.FC = () => {
               onUpdateImage={updateImageOptions}
               onUpdateWord={updateWordOptions}
               onUpdatePdfToWord={updatePdfToWordOptions}
+              onUpdatePdfToImage={updatePdfToImageOptions}
             />
           )}
 

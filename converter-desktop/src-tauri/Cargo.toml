@@ -27,6 +27,7 @@ image = { version = "0.25", default-features = false, features = ["jpeg", "png",
 flate2 = "1.0"
 tauri-plugin-dialog = "2"
 docx-rs = "0.4.22"
+pdf-render = "1.2.0"
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]

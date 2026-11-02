@@ -12,6 +12,7 @@ import {
   executeTauriImageToPdf,
   executeTauriWordToPdf,
   executeTauriPdfToWord,
+  executeTauriPdfToImage,
   getDefaultOutputDir,
 } from "@/services/tauriConversionService";
 
@@ -40,6 +41,7 @@ interface ConversionStoreState {
   updateImageOptions: (opts: Partial<Extract<ToolOptionsState, { type: "image-to-pdf" }>["options"]>) => void;
   updateWordOptions: (opts: Partial<Extract<ToolOptionsState, { type: "word-to-pdf" }>["options"]>) => void;
   updatePdfToWordOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pdf-to-word" }>["options"]>) => void;
+  updatePdfToImageOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pdf-to-image" }>["options"]>) => void;
 
   startConversion: (toolId: string) => Promise<void>;
   cancelConversion: () => void;
@@ -149,6 +151,17 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           },
         };
         break;
+      case "pdf-to-image":
+        optionsState = {
+          type: "pdf-to-image",
+          options: {
+            outputPrefix: "page",
+            format: "png",
+            dpi: 150,
+            pageRange: "",
+          },
+        };
+        break;
       default:
         optionsState = {
           type: "merge-pdf",
@@ -217,6 +230,18 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
   updatePdfToWordOptions: (opts) => {
     set((state) => {
       if (state.optionsState.type !== "pdf-to-word") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  updatePdfToImageOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "pdf-to-image") return state;
       return {
         optionsState: {
           ...state.optionsState,
@@ -362,6 +387,23 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
                   openAfterConvert: true,
                 };
           res = await executeTauriPdfToWord(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress
+          );
+          break;
+        }
+        case "pdf-to-image": {
+          const opts =
+            optionsState.type === "pdf-to-image"
+              ? optionsState.options
+              : {
+                  outputPrefix: "page",
+                  format: "png" as const,
+                  dpi: 150 as const,
+                  pageRange: "",
+                };
+          res = await executeTauriPdfToImage(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
             onProgress

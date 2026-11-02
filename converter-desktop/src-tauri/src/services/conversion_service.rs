@@ -1,8 +1,8 @@
-use crate::converters::{docx_to_pdf, image_to_pdf, pdf_merge, pdf_split, pdf_to_word};
+use crate::converters::{docx_to_pdf, image_to_pdf, pdf_merge, pdf_split, pdf_to_image, pdf_to_word};
 use crate::errors::AppError;
 use crate::models::{
-    ConversionResult, ImageToPdfRequest, MergePdfRequest, PdfToWordRequest, ProgressEvent,
-    SplitPdfRequest, WordToPdfRequest,
+    ConversionResult, ImageToPdfRequest, MergePdfRequest, PdfToImageRequest, PdfToWordRequest,
+    ProgressEvent, SplitPdfRequest, WordToPdfRequest,
 };
 use tauri::{AppHandle, Emitter};
 
@@ -78,6 +78,24 @@ pub fn execute_pdf_to_word(
     emit_progress(&app, &job_id, 15, "Menganalisis teks & tata letak PDF...");
     let result = pdf_to_word::convert_pdf_to_docx(&req.input_path, &req.output_path)?;
     emit_progress(&app, &job_id, 100, "Konversi PDF ke DOCX selesai");
+    Ok(result)
+}
+
+pub fn execute_pdf_to_image(
+    app: AppHandle,
+    job_id: String,
+    req: PdfToImageRequest,
+) -> Result<ConversionResult, AppError> {
+    emit_progress(&app, &job_id, 15, "Merasterisasi halaman PDF menjadi gambar...");
+    let result = pdf_to_image::convert_pdf_to_images(
+        &req.input_path,
+        &req.output_dir,
+        req.output_prefix.as_deref(),
+        req.format.as_deref(),
+        req.dpi,
+        req.page_range.as_deref(),
+    )?;
+    emit_progress(&app, &job_id, 100, "Konversi PDF ke gambar selesai");
     Ok(result)
 }
 
