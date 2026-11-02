@@ -287,10 +287,10 @@ Result harus mengembalikan `original_size`, `compressed_size`, dan `reduction_pe
 ### 3.5 Integrasi & Testing
 
 **Acceptance Criteria Fase 3:**
-- [ ] Kompresi berhasil mengurangi ukuran PDF
-- [ ] 3 unit test lulus
-- [ ] UI menampilkan statistik kompresi
-- [ ] Semua fitur sebelumnya tetap berjalan
+- [x] Kompresi berhasil mengurangi ukuran PDF (`poc-converters/src/bin/poc_compress_pdf.rs`, `pdf_compress.rs`)
+- [x] 3 unit test lulus (`test_compress_pdf_success`, `test_compress_pdf_levels`, `test_compress_pdf_invalid_inputs`)
+- [x] UI menampilkan opsi tingkat kompresi dan statistik penghematan ukuran di ResultPanel
+- [x] Semua fitur sebelumnya tetap berjalan (`cargo test` 24/24 test lulus)
 
 **Git checkpoint:**
 ```powershell

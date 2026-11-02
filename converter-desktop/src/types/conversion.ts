@@ -48,13 +48,20 @@ export interface PdfToImageOptions {
   pageRange?: string;
 }
 
+export interface CompressPdfOptions {
+  outputFileName: string;
+  outputDir?: string;
+  level: "low" | "medium" | "high";
+}
+
 export type ToolOptionsState =
   | { type: "merge-pdf"; options: MergePdfOptions }
   | { type: "split-pdf"; options: SplitPdfOptions }
   | { type: "image-to-pdf"; options: ImageToPdfOptions }
   | { type: "word-to-pdf"; options: WordToPdfOptions }
   | { type: "pdf-to-word"; options: PdfToWordOptions }
-  | { type: "pdf-to-image"; options: PdfToImageOptions };
+  | { type: "pdf-to-image"; options: PdfToImageOptions }
+  | { type: "compress-pdf"; options: CompressPdfOptions };
 
 export type ConversionStatus =
   | "idle"
@@ -70,6 +77,9 @@ export interface ConversionResult {
   durationMs: number;
   totalPages?: number;
   createdAt: string;
+  originalSizeBytes?: number;
+  compressedSizeBytes?: number;
+  reductionPercent?: number;
 }
 
 // Backward compatibility alias

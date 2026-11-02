@@ -17,6 +17,7 @@ interface ConversionOptionsPanelProps {
   onUpdateWord: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
   onUpdatePdfToWord?: (opts: { outputFileName?: string; openAfterConvert?: boolean }) => void;
   onUpdatePdfToImage?: (opts: { format?: "png" | "jpg"; dpi?: 150 | 300; pageRange?: string; outputPrefix?: string }) => void;
+  onUpdateCompress?: (opts: { outputFileName?: string; level?: "low" | "medium" | "high" }) => void;
 }
 
 export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
@@ -31,6 +32,7 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   onUpdateWord,
   onUpdatePdfToWord,
   onUpdatePdfToImage,
+  onUpdateCompress,
 }) => {
   return (
     <Card className="border shadow-sm">
@@ -334,6 +336,54 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
               Setiap halaman PDF akan diekstrak menjadi satu berkas gambar.
+            </p>
+          </div>
+        )}
+        {/* Compress PDF Options */}
+        {toolId === "compress-pdf" && optionsState.type === "compress-pdf" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Tingkat Kompresi
+              </label>
+              <div className="grid grid-cols-3 gap-1">
+                {[
+                  { level: "low" as const, label: "Rendah", desc: "Kualitas Tinggi" },
+                  { level: "medium" as const, label: "Sedang", desc: "Direkomendasikan" },
+                  { level: "high" as const, label: "Tinggi", desc: "Ukuran Minimum" },
+                ].map((item) => (
+                  <Button
+                    key={item.level}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.level === item.level ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-10 flex flex-col items-center justify-center text-xs p-1"
+                    onClick={() => onUpdateCompress?.({ level: item.level })}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Hasil
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdateCompress?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="compressed_document.pdf"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Menghapus objek mubazir dan mengoptimalkan kompresi gambar secara lokal.
             </p>
           </div>
         )}

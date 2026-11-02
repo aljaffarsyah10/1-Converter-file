@@ -51,7 +51,15 @@ pub struct PdfToImageRequest {
     pub page_range: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CompressPdfRequest {
+    pub input_path: String,
+    pub output_path: String,
+    pub level: Option<String>, // "low", "medium", "high"
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct ConversionResult {
     pub success: bool,
@@ -59,6 +67,12 @@ pub struct ConversionResult {
     pub duration_ms: u128,
     pub file_size_bytes: u64,
     pub total_pages: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub original_size_bytes: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub compressed_size_bytes: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reduction_percent: Option<f64>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

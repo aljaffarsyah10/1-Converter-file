@@ -13,6 +13,7 @@ import {
   executeTauriWordToPdf,
   executeTauriPdfToWord,
   executeTauriPdfToImage,
+  executeTauriCompressPdf,
   getDefaultOutputDir,
 } from "@/services/tauriConversionService";
 
@@ -42,6 +43,7 @@ interface ConversionStoreState {
   updateWordOptions: (opts: Partial<Extract<ToolOptionsState, { type: "word-to-pdf" }>["options"]>) => void;
   updatePdfToWordOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pdf-to-word" }>["options"]>) => void;
   updatePdfToImageOptions: (opts: Partial<Extract<ToolOptionsState, { type: "pdf-to-image" }>["options"]>) => void;
+  updateCompressPdfOptions: (opts: Partial<Extract<ToolOptionsState, { type: "compress-pdf" }>["options"]>) => void;
 
   startConversion: (toolId: string) => Promise<void>;
   cancelConversion: () => void;
@@ -162,6 +164,15 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           },
         };
         break;
+      case "compress-pdf":
+        optionsState = {
+          type: "compress-pdf",
+          options: {
+            outputFileName: "compressed_document.pdf",
+            level: "medium",
+          },
+        };
+        break;
       default:
         optionsState = {
           type: "merge-pdf",
@@ -242,6 +253,18 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
   updatePdfToImageOptions: (opts) => {
     set((state) => {
       if (state.optionsState.type !== "pdf-to-image") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  updateCompressPdfOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "compress-pdf") return state;
       return {
         optionsState: {
           ...state.optionsState,
@@ -404,6 +427,21 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
                   pageRange: "",
                 };
           res = await executeTauriPdfToImage(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress
+          );
+          break;
+        }
+        case "compress-pdf": {
+          const opts =
+            optionsState.type === "compress-pdf"
+              ? optionsState.options
+              : {
+                  outputFileName: "compressed_document.pdf",
+                  level: "medium" as const,
+                };
+          res = await executeTauriCompressPdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
             onProgress

@@ -119,6 +119,17 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
               </span>
             </div>
 
+            {result.reductionPercent !== undefined && (
+              <div className="flex items-center justify-between border-t pt-2">
+                <span className="text-muted-foreground">Efisiensi Ukuran:</span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  {result.reductionPercent > 0
+                    ? `Berkurang ${result.reductionPercent.toFixed(1)}%`
+                    : "Sudah teroptimasi secara optimal"}
+                </span>
+              </div>
+            )}
+
             {result.totalPages !== undefined && (
               <div className="flex items-center justify-between border-t pt-2">
                 <span className="text-muted-foreground">Total Halaman:</span>

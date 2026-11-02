@@ -5,7 +5,7 @@ pub mod models;
 pub mod services;
 
 use commands::convert::{
-    convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_image, convert_pdf_to_word, convert_split_pdf, convert_word_to_pdf,
+    convert_compress_pdf, convert_image_to_pdf, convert_merge_pdf, convert_pdf_to_image, convert_pdf_to_word, convert_split_pdf, convert_word_to_pdf,
 };
 use commands::system::{get_default_output_dir, get_files_metadata, get_system_engine_info};
 
@@ -28,6 +28,7 @@ pub fn run() {
             convert_word_to_pdf,
             convert_pdf_to_word,
             convert_pdf_to_image,
+            convert_compress_pdf,
             get_system_engine_info,
             get_default_output_dir,
             get_files_metadata,
@@ -571,6 +572,100 @@ mod tests {
             );
             assert!(res_oob.is_err(), "Page 99 on 2-page PDF must return Err");
         }
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_compress_pdf_success() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_compress_pdf_success");
+        let _ = fs::create_dir_all(&temp_dir);
+        let out_pdf = temp_dir.join("compressed_sample1.pdf");
+
+        let res = converters::pdf_compress::compress_pdf_file(
+            &sample1,
+            &out_pdf.to_string_lossy(),
+            Some("medium"),
+        );
+        assert!(res.is_ok(), "Compress PDF should succeed: {:?}", res.err());
+        let result = res.unwrap();
+        assert!(result.success);
+        assert_eq!(result.total_pages, 2);
+        assert!(out_pdf.exists());
+        assert!(result.original_size_bytes.is_some());
+        assert!(result.compressed_size_bytes.is_some());
+        assert!(result.reduction_percent.is_some());
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_compress_pdf_levels() {
+        let fixtures_dir = Path::new("..").join("poc-converters").join("fixtures");
+        let sample1 = fixtures_dir.join("sample1.pdf").to_string_lossy().to_string();
+        if !Path::new(&sample1).exists() {
+            return;
+        }
+
+        let temp_dir = std::env::temp_dir().join("test_compress_pdf_levels");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        for level in &["low", "medium", "high"] {
+            let out_pdf = temp_dir.join(format!("compressed_{}.pdf", level));
+            let res = converters::pdf_compress::compress_pdf_file(
+                &sample1,
+                &out_pdf.to_string_lossy(),
+                Some(level),
+            );
+            assert!(res.is_ok(), "Compress PDF level {} should succeed", level);
+            assert!(out_pdf.exists());
+        }
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_compress_pdf_invalid_inputs() {
+        let temp_dir = std::env::temp_dir().join("test_compress_pdf_invalid");
+        let _ = fs::create_dir_all(&temp_dir);
+
+        // 1. Non existent file
+        let fake = "C:\\path\\does_not_exist_xyz.pdf";
+        let out1 = temp_dir.join("out1.pdf");
+        let res_fake = converters::pdf_compress::compress_pdf_file(
+            fake,
+            &out1.to_string_lossy(),
+            None,
+        );
+        assert!(res_fake.is_err(), "Non existent file must fail");
+
+        // 2. 0-byte file
+        let empty_pdf = temp_dir.join("empty.pdf");
+        fs::write(&empty_pdf, b"").expect("write empty");
+        let out2 = temp_dir.join("out2.pdf");
+        let res_empty = converters::pdf_compress::compress_pdf_file(
+            &empty_pdf.to_string_lossy(),
+            &out2.to_string_lossy(),
+            None,
+        );
+        assert!(res_empty.is_err(), "0-byte PDF must fail");
+
+        // 3. Invalid extension
+        let txt_file = temp_dir.join("file.txt");
+        fs::write(&txt_file, b"hello").expect("write txt");
+        let out3 = temp_dir.join("out3.pdf");
+        let res_txt = converters::pdf_compress::compress_pdf_file(
+            &txt_file.to_string_lossy(),
+            &out3.to_string_lossy(),
+            None,
+        );
+        assert!(res_txt.is_err(), "Non-PDF extension must fail");
 
         let _ = fs::remove_dir_all(temp_dir);
     }

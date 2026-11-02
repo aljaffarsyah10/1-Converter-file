@@ -155,5 +155,7 @@ pub fn convert_pdf_to_images(
         duration_ms: start.elapsed().as_millis(),
         file_size_bytes: total_bytes_written,
         total_pages: selected_pages.len(),
+        ..Default::default()
     })
 }
+

@@ -196,6 +196,7 @@ pub fn split_pdf_file(
         duration_ms: start.elapsed().as_millis(),
         file_size_bytes: total_output_size,
         total_pages: target_pages.len(),
+        ..Default::default()
     })
 }
 

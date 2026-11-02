@@ -109,6 +109,7 @@ pub fn convert_pdf_to_docx(input_path: &str, output_path: &str) -> Result<Conver
         duration_ms: start.elapsed().as_millis(),
         file_size_bytes: out_metadata.len(),
         total_pages,
+        ..Default::default()
     })
 }
 

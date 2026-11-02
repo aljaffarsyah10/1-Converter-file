@@ -108,6 +108,7 @@ pub fn merge_pdf_files(input_paths: &[String], output_path: &str) -> Result<Conv
         duration_ms: start.elapsed().as_millis(),
         file_size_bytes: metadata.len(),
         total_pages: page_count,
+        ..Default::default()
     })
 }
 

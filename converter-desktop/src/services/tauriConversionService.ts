@@ -14,6 +14,7 @@ import {
   WordToPdfOptions,
   PdfToWordOptions,
   PdfToImageOptions,
+  CompressPdfOptions,
 } from "@/types/conversion";
 
 interface BackendConversionResult {
@@ -22,6 +23,9 @@ interface BackendConversionResult {
   durationMs: number;
   fileSizeBytes: number;
   totalPages: number;
+  originalSizeBytes?: number;
+  compressedSizeBytes?: number;
+  reductionPercent?: number;
 }
 
 export function formatBytes(bytes: number): string {
@@ -493,6 +497,56 @@ export async function executeTauriPdfToImage(
       durationMs: Number(result.durationMs),
       totalPages: result.totalPages,
       createdAt: new Date().toLocaleTimeString("id-ID"),
+    };
+  } catch (err) {
+    throw parseBackendError(err);
+  } finally {
+    if (unlisten) unlisten();
+  }
+}
+
+export async function executeTauriCompressPdf(
+  file: StagedFile,
+  options: CompressPdfOptions,
+  onProgress?: (percent: number, stage: string) => void
+): Promise<ConversionResult> {
+  const jobId = `job-compress-${Date.now()}`;
+  let unlisten: UnlistenFn | undefined;
+
+  if (onProgress) {
+    unlisten = await listen<ProgressEventPayload>("conversion-progress", (event) => {
+      if (event.payload.job_id === jobId) {
+        onProgress(event.payload.percent, event.payload.stage);
+      }
+    });
+  }
+
+  try {
+    const outDir = options.outputDir || (await getDefaultOutputDir());
+    const baseName =
+      options.outputFileName.replace(/\.pdf$/i, "") ||
+      file.name.replace(/\.pdf$/i, "") + "-compressed";
+    const outputPath = `${outDir}\\${baseName}.pdf`;
+
+    const result = await invoke<BackendConversionResult>("convert_compress_pdf", {
+      jobId,
+      request: {
+        inputPath: file.path,
+        outputPath,
+        level: options.level,
+      },
+    });
+
+    return {
+      outputPath: result.outputPath,
+      outputFileName: extractFileName(result.outputPath),
+      outputSizeFormatted: formatBytes(result.fileSizeBytes),
+      durationMs: Number(result.durationMs),
+      totalPages: result.totalPages,
+      createdAt: new Date().toLocaleTimeString("id-ID"),
+      originalSizeBytes: result.originalSizeBytes,
+      compressedSizeBytes: result.compressedSizeBytes,
+      reductionPercent: result.reductionPercent,
     };
   } catch (err) {
     throw parseBackendError(err);

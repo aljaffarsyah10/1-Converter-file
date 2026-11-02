@@ -34,3 +34,7 @@ path = "src/bin/poc_pdf_to_word.rs"
 name = "poc_pdf_to_image"
 path = "src/bin/poc_pdf_to_image.rs"
 
+[[bin]]
+name = "poc_compress_pdf"
+path = "src/bin/poc_compress_pdf.rs"
+

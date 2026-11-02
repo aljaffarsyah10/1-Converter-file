@@ -54,3 +54,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("SUCCESS! PDF to Image rendering completed flawlessly!");
     Ok(())
 }
+

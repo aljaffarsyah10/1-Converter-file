@@ -180,6 +180,7 @@ pub fn convert_images_to_pdf(
         duration_ms: start.elapsed().as_millis(),
         file_size_bytes: metadata.len(),
         total_pages: page_count,
+        ..Default::default()
     })
 }
 
