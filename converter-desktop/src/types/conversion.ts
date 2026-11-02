@@ -112,6 +112,15 @@ export interface ConvertImageOptions {
 }
 
 
+export interface MarkdownToPdfOptions {
+  outputFileName: string;
+  outputDir?: string;
+  theme: "github" | "minimal";
+  pageSize: "A4" | "Letter";
+  margin: "none" | "small" | "normal";
+  orientation: "portrait" | "landscape";
+}
+
 export interface HtmlToPdfOptions {
   outputFileName: string;
   outputDir?: string;
@@ -155,7 +164,8 @@ export type ToolOptionsState =
   | { type: "image-compress"; options: CompressImageOptions }
   | { type: "image-convert"; options: ConvertImageOptions }
   | { type: "image-resize"; options: ResizeImageOptions }
-  | { type: "html-to-pdf"; options: HtmlToPdfOptions };
+  | { type: "html-to-pdf"; options: HtmlToPdfOptions }
+  | { type: "markdown-to-pdf"; options: MarkdownToPdfOptions };
 
 export type ConversionStatus =
   | "idle"

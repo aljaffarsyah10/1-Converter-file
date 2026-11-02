@@ -1,10 +1,10 @@
 use crate::converters::{
-    docx_to_pdf, excel_to_pdf, html_to_pdf, image_compress, image_convert, image_resize, image_to_pdf, pdf_compress, pdf_merge, pdf_protect, pdf_rotate,
+    docx_to_pdf, excel_to_pdf, html_to_pdf, image_compress, image_convert, image_resize, image_to_pdf, markdown_to_pdf, pdf_compress, pdf_merge, pdf_protect, pdf_rotate,
     pdf_split, pdf_to_excel, pdf_to_image, pdf_to_word, pdf_unlock, pdf_watermark, pptx_to_pdf,
 };
 use crate::errors::AppError;
 use crate::models::{
-    CompressImageRequest, CompressPdfRequest, ConversionResult, ConvertImageRequest, ExcelToPdfRequest, HtmlToPdfRequest, ImageToPdfRequest, MergePdfRequest,
+    CompressImageRequest, CompressPdfRequest, ConversionResult, ConvertImageRequest, ExcelToPdfRequest, HtmlToPdfRequest, ImageToPdfRequest, MarkdownToPdfRequest, MergePdfRequest,
     PdfToExcelRequest, PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, ProgressEvent,
     ProtectPdfRequest, ResizeImageRequest, RotatePdfRequest, SplitPdfRequest, UnlockPdfRequest, WatermarkPdfRequest, WordToPdfRequest,
 };
@@ -264,6 +264,23 @@ pub fn execute_html_to_pdf(
         req.orientation.as_deref(),
     )?;
     emit_progress(&app, &job_id, 100, "Konversi HTML ke PDF selesai");
+    Ok(result)
+}
+pub fn execute_markdown_to_pdf(
+    app: AppHandle,
+    job_id: String,
+    req: MarkdownToPdfRequest,
+) -> Result<ConversionResult, AppError> {
+    emit_progress(&app, &job_id, 20, "Memproses Markdown dan merender ke PDF...");
+    let result = markdown_to_pdf::convert_markdown_to_pdf(
+        &req.input_path,
+        &req.output_path,
+        req.theme.as_deref(),
+        req.page_size.as_deref(),
+        req.margin.as_deref(),
+        req.orientation.as_deref(),
+    )?;
+    emit_progress(&app, &job_id, 100, "Konversi Markdown ke PDF selesai");
     Ok(result)
 }
 

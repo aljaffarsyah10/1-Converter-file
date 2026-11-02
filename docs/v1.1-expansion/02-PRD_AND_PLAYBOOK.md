@@ -649,8 +649,8 @@ Buat `converters/markdown_to_pdf.rs`:
 - Ubah `markdown-to-pdf` → `isAvailable: true`.
 
 **Acceptance Criteria Fase 12:**
-- [ ] Markdown dengan heading, list, code block → PDF yang rapi
-- [ ] 3 unit test lulus
+- [x] Markdown dengan heading, list, code block → PDF yang rapi
+- [x] 3 unit test lulus
 
 **Git checkpoint:**
 ```powershell

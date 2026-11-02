@@ -138,6 +138,17 @@ pub struct HtmlToPdfRequest {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct MarkdownToPdfRequest {
+    pub input_path: String,
+    pub output_path: String,
+    pub theme: Option<String>,
+    pub page_size: Option<String>,
+    pub margin: Option<String>,
+    pub orientation: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct PdfToImageRequest {
     pub input_path: String,
     pub output_dir: String,

@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToolOptionsState } from "@/types/conversion";
-import { Settings2, FolderOpen, AlertCircle, Lock, Unlock, Eye, EyeOff, Stamp, ImageDown, RefreshCw, Scaling, Code } from "lucide-react";
+import { Settings2, FolderOpen, AlertCircle, Lock, Unlock, Eye, EyeOff, Stamp, ImageDown, RefreshCw, Scaling, Code, BookOpen } from "lucide-react";
 
 interface ConversionOptionsPanelProps {
   toolId: string;
@@ -98,6 +98,13 @@ interface ConversionOptionsPanelProps {
     margin?: "none" | "small" | "normal";
     orientation?: "portrait" | "landscape";
   }) => void;
+  onUpdateMarkdownToPdf?: (opts: {
+    outputFileName?: string;
+    theme?: "github" | "minimal";
+    pageSize?: "A4" | "Letter";
+    margin?: "none" | "small" | "normal";
+    orientation?: "portrait" | "landscape";
+  }) => void;
 
 
 
@@ -128,6 +135,7 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
   onUpdateConvertImage,
   onUpdateResizeImage,
   onUpdateHtmlToPdf,
+  onUpdateMarkdownToPdf,
 }) => {
   const [showProtectPass, setShowProtectPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
@@ -893,6 +901,130 @@ export const ConversionOptionsPanel: React.FC<ConversionOptionsPanelProps> = ({
             <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
               Merender halaman HTML dan styling CSS secara offline dengan engine browser bawaan Windows.
+            </p>
+          </div>
+        )}
+
+        {/* 19. Markdown to PDF Options */}
+        {toolId === "markdown-to-pdf" && optionsState.type === "markdown-to-pdf" && (
+          <div className="space-y-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <BookOpen className="w-3.5 h-3.5 text-primary" />
+                Tema Dokumen (Theme)
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { theme: "github" as const, label: "GitHub", desc: "Modern & Clean" },
+                  { theme: "minimal" as const, label: "Minimalist", desc: "Serif Elegance" },
+                ].map((item) => (
+                  <Button
+                    key={item.theme}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.theme === item.theme ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-10 flex flex-col items-center justify-center text-xs p-1"
+                    onClick={() => onUpdateMarkdownToPdf?.({ theme: item.theme })}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Ukuran Kertas
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { size: "A4" as const, label: "A4", desc: "210 × 297 mm" },
+                  { size: "Letter" as const, label: "US Letter", desc: "8.5 × 11 in" },
+                ].map((item) => (
+                  <Button
+                    key={item.size}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.pageSize === item.size ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-10 flex flex-col items-center justify-center text-xs p-1"
+                    onClick={() => onUpdateMarkdownToPdf?.({ pageSize: item.size })}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Orientasi Halaman
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { ori: "portrait" as const, label: "Tegak (Portrait)" },
+                  { ori: "landscape" as const, label: "Mendatar (Landscape)" },
+                ].map((item) => (
+                  <Button
+                    key={item.ori}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.orientation === item.ori ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-8 text-xs font-semibold"
+                    onClick={() => onUpdateMarkdownToPdf?.({ orientation: item.ori })}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Batas Tepi (Margin)
+              </label>
+              <div className="grid grid-cols-3 gap-1">
+                {[
+                  { m: "normal" as const, label: "Standar", desc: "15 mm" },
+                  { m: "small" as const, label: "Sempit", desc: "8 mm" },
+                  { m: "none" as const, label: "Tanpa Margin", desc: "0 mm" },
+                ].map((item) => (
+                  <Button
+                    key={item.m}
+                    type="button"
+                    size="sm"
+                    variant={optionsState.options.margin === item.m ? "default" : "outline"}
+                    disabled={disabled}
+                    className="h-10 flex flex-col items-center justify-center text-xs p-1"
+                    onClick={() => onUpdateMarkdownToPdf?.({ margin: item.m })}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] opacity-75 font-normal">{item.desc}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Nama Berkas Hasil (.pdf)
+              </label>
+              <Input
+                disabled={disabled}
+                value={optionsState.options.outputFileName}
+                onChange={(e) => onUpdateMarkdownToPdf?.({ outputFileName: e.target.value })}
+                className="text-xs h-8 font-mono"
+                placeholder="rendered_markdown.pdf"
+              />
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+              Merender Markdown ke dokumen PDF terformat rapi dengan tema terpilih.
             </p>
           </div>
         )}

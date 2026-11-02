@@ -1,5 +1,5 @@
 use crate::models::{
-    CompressImageRequest, CompressPdfRequest, ConversionResult, ConvertImageRequest, ExcelToPdfRequest, HtmlToPdfRequest, ImageToPdfRequest, MergePdfRequest,
+    CompressImageRequest, CompressPdfRequest, ConversionResult, ConvertImageRequest, ExcelToPdfRequest, HtmlToPdfRequest, ImageToPdfRequest, MarkdownToPdfRequest, MergePdfRequest,
     PdfToExcelRequest, PdfToImageRequest, PdfToWordRequest, PptxToPdfRequest, ProtectPdfRequest,
     ResizeImageRequest, RotatePdfRequest,
     SplitPdfRequest, UnlockPdfRequest, WatermarkPdfRequest, WordToPdfRequest,
@@ -250,6 +250,19 @@ pub async fn convert_html_to_pdf(
 ) -> Result<ConversionResult, String> {
     tauri::async_runtime::spawn_blocking(move || {
         conversion_service::execute_html_to_pdf(app, job_id, request)
+    })
+    .await
+    .map_err(|e| format!("Task execution error: {}", e))?
+    .map_err(|e| e.to_string())
+}
+#[tauri::command]
+pub async fn convert_markdown_to_pdf(
+    app: AppHandle,
+    job_id: String,
+    request: MarkdownToPdfRequest,
+) -> Result<ConversionResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        conversion_service::execute_markdown_to_pdf(app, job_id, request)
     })
     .await
     .map_err(|e| format!("Task execution error: {}", e))?

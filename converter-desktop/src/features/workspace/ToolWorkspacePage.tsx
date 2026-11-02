@@ -52,6 +52,7 @@ export const ToolWorkspacePage: React.FC = () => {
     updateConvertImageOptions,
     updateResizeImageOptions,
     updateHtmlToPdfOptions,
+    updateMarkdownToPdfOptions,
     startConversion,
     cancelConversion,
     resetJob,
@@ -99,7 +100,8 @@ export const ToolWorkspacePage: React.FC = () => {
     tool.id === "image-compress" ||
     tool.id === "image-convert" ||
     tool.id === "image-resize" ||
-    tool.id === "html-to-pdf"
+    tool.id === "html-to-pdf" ||
+    tool.id === "markdown-to-pdf"
       ? 1
       : undefined;
 
@@ -167,6 +169,7 @@ export const ToolWorkspacePage: React.FC = () => {
               onUpdateConvertImage={updateConvertImageOptions}
               onUpdateResizeImage={updateResizeImageOptions}
               onUpdateHtmlToPdf={updateHtmlToPdfOptions}
+              onUpdateMarkdownToPdf={updateMarkdownToPdfOptions}
             />
           )}
 

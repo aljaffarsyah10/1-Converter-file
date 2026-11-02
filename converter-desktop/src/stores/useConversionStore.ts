@@ -25,6 +25,7 @@ import {
   executeTauriConvertImage,
   executeTauriResizeImage,
   executeTauriHtmlToPdf,
+  executeTauriMarkdownToPdf,
   getDefaultOutputDir,
 } from "@/services/tauriConversionService";
 
@@ -136,6 +137,12 @@ interface ConversionStoreState {
     updateHtmlToPdfOptions: (
     opts: Partial<
       Extract<ToolOptionsState, { type: "html-to-pdf" }>["options"]
+    >,
+  ) => void;
+
+  updateMarkdownToPdfOptions: (
+    opts: Partial<
+      Extract<ToolOptionsState, { type: "markdown-to-pdf" }>["options"]
     >,
   ) => void;
 
@@ -379,6 +386,18 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
           },
         };
         break;
+      case "markdown-to-pdf":
+        optionsState = {
+          type: "markdown-to-pdf",
+          options: {
+            outputFileName: "rendered_markdown.pdf",
+            theme: "github",
+            pageSize: "A4",
+            margin: "normal",
+            orientation: "portrait",
+          },
+        };
+        break;
       default:
         optionsState = {
           type: "merge-pdf",
@@ -607,6 +626,18 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
   updateHtmlToPdfOptions: (opts) => {
     set((state) => {
       if (state.optionsState.type !== "html-to-pdf") return state;
+      return {
+        optionsState: {
+          ...state.optionsState,
+          options: { ...state.optionsState.options, ...opts },
+        },
+      };
+    });
+  },
+
+  updateMarkdownToPdfOptions: (opts) => {
+    set((state) => {
+      if (state.optionsState.type !== "markdown-to-pdf") return state;
       return {
         optionsState: {
           ...state.optionsState,
@@ -1016,6 +1047,24 @@ export const useConversionStore = create<ConversionStoreState>((set, get) => ({
                   orientation: "portrait" as const,
                 };
           res = await executeTauriHtmlToPdf(
+            files[0],
+            { ...opts, outputDir: outputDir || undefined },
+            onProgress,
+          );
+          break;
+        }
+        case "markdown-to-pdf": {
+          const opts =
+            optionsState.type === "markdown-to-pdf"
+              ? optionsState.options
+              : {
+                  outputFileName: "rendered_markdown.pdf",
+                  theme: "github" as const,
+                  pageSize: "A4" as const,
+                  margin: "normal" as const,
+                  orientation: "portrait" as const,
+                };
+          res = await executeTauriMarkdownToPdf(
             files[0],
             { ...opts, outputDir: outputDir || undefined },
             onProgress,

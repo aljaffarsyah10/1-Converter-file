@@ -5,6 +5,7 @@ pub mod image_compress;
 pub mod image_convert;
 pub mod image_resize;
 pub mod image_to_pdf;
+pub mod markdown_to_pdf;
 pub mod pdf_compress;
 pub mod pdf_merge;
 pub mod pdf_protect;
