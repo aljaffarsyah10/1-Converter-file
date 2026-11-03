@@ -1,0 +1,9 @@
+# Phase 14: Word COM High-Precision Automation
+[x] Ubah prioritas engine: Utamakan Windows Word COM di atas LibreOffice untuk konversi DOCX pixel-perfect
+[x] Implementasikan ExportAsFixedFormat dengan parameter wdExportOptimizeForPrint (kualitas cetak tinggi)
+[x] Tambahkan pembuatan otomatis outline/bookmark PDF (wdExportCreateHeadingBookmarks)
+[x] Aktifkan silent mode: DisplayAlerts = 0, ScreenUpdating = $false untuk mencegah modal dialog hang
+[x] Buka dokumen dengan mode ReadOnly dan tanpa konversi prompt
+[x] COM Reference cleanup: ReleaseComObject dan explicit Garbage Collector untuk mencegah proses zombie WINWORD.EXE
+[x] Validasi via biner poc_docx2pdf (Passed, valid 1-page PDF 88 KB)
+[x] Validasi via unit test test_docx_to_pdf_conversion_e2e (Passed 100%)

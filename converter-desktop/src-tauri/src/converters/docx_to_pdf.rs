@@ -61,10 +61,11 @@ pub fn detect_docx_engine() -> (DocxEngine, SystemEngineInfo) {
         }
     }
 
-    let engine = if let Some(ref lp) = lo_path {
-        DocxEngine::LibreOffice(lp.clone())
-    } else if word_com {
+    // 3. Select engine: prioritize Word COM for pixel-perfect fidelity on Windows
+    let engine = if word_com {
         DocxEngine::WindowsWordCom
+    } else if let Some(ref lp) = lo_path {
+        DocxEngine::LibreOffice(lp.clone())
     } else {
         DocxEngine::None
     };
@@ -126,21 +127,32 @@ pub fn convert_docx_to_pdf(input_path: &str, output_path: &str) -> Result<Conver
         }
         DocxEngine::WindowsWordCom => {
             let script = format!(
-                "$word = New-Object -ComObject Word.Application; \
-                 $word.Visible = $false; \
+                "$word = $null; $doc = $null; \
                  try {{ \
-                     $doc = $word.Documents.Open('{clean_in}'); \
-                     $doc.SaveAs([ref]'{clean_out}', [ref]17); \
-                     $doc.Close(); \
+                     $word = New-Object -ComObject Word.Application; \
+                     $word.Visible = $false; \
+                     $word.DisplayAlerts = 0; \
+                     $word.ScreenUpdating = $false; \
+                     $doc = $word.Documents.Open('{clean_in}', $false, $true, $false); \
+                     try {{ \
+                         $doc.ExportAsFixedFormat('{clean_out}', 17, $false, 0, 0, 1, 1, 0, $true, $true, 1, $true, $true, $false); \
+                     }} catch {{ \
+                         $doc.SaveAs([ref]'{clean_out}', [ref]17); \
+                     }} \
+                     $doc.Close([ref]0); \
+                     $doc = $null; \
                  }} finally {{ \
-                     $word.Quit(); \
+                     if ($doc) {{ try {{ $doc.Close([ref]0); [System.Runtime.InteropServices.Marshal]::ReleaseComObject($doc) | Out-Null; }} catch {{}} }} \
+                     if ($word) {{ try {{ $word.Quit([ref]0); [System.Runtime.InteropServices.Marshal]::ReleaseComObject($word) | Out-Null; }} catch {{}} }} \
+                     [System.GC]::Collect(); \
+                     [System.GC]::WaitForPendingFinalizers(); \
                  }}",
                 clean_in = clean_in.replace('\\', "\\\\"),
                 clean_out = clean_out.replace('\\', "\\\\"),
             );
 
             let status = Command::new("powershell")
-                .args(["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", &script])
+                .args(["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", &script])
                 .status()
                 .map_err(|e| AppError::ExecutionError(format!("Gagal menjalankan Word COM automation: {}", e)))?;
 

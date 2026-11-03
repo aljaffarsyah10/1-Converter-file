@@ -10,7 +10,13 @@ pub enum DocxEngine {
 }
 
 fn detect_docx_engine() -> DocxEngine {
-    // 1. Check LibreOffice
+    // 1. Check Windows Word COM first for pixel-perfect fidelity
+    let word_path = PathBuf::from("C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE");
+    if word_path.exists() {
+        return DocxEngine::WindowsWordCom;
+    }
+
+    // 2. Check LibreOffice
     let lo_candidates = [
         PathBuf::from("C:\\Program Files\\LibreOffice\\program\\soffice.exe"),
         PathBuf::from("C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe"),
@@ -30,12 +36,6 @@ fn detect_docx_engine() -> DocxEngine {
                 return DocxEngine::LibreOffice(PathBuf::from(path_str));
             }
         }
-    }
-
-    // 2. Check Windows Word COM
-    let word_path = PathBuf::from("C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE");
-    if word_path.exists() {
-        return DocxEngine::WindowsWordCom;
     }
 
     DocxEngine::None
@@ -69,23 +69,34 @@ fn convert_docx_to_pdf(input_path: &str, output_path: &str, engine: &DocxEngine)
             }
         }
         DocxEngine::WindowsWordCom => {
-            println!("Executing Windows Native Word COM Automation...");
+            println!("Executing Windows Native Word COM Automation (High Precision)...");
             let script = format!(
-                "$word = New-Object -ComObject Word.Application; \
-                 $word.Visible = $false; \
+                "$word = $null; $doc = $null; \
                  try {{ \
-                     $doc = $word.Documents.Open('{clean_in}'); \
-                     $doc.SaveAs([ref]'{clean_out}', [ref]17); \
-                     $doc.Close(); \
+                     $word = New-Object -ComObject Word.Application; \
+                     $word.Visible = $false; \
+                     $word.DisplayAlerts = 0; \
+                     $word.ScreenUpdating = $false; \
+                     $doc = $word.Documents.Open('{clean_in}', $false, $true, $false); \
+                     try {{ \
+                         $doc.ExportAsFixedFormat('{clean_out}', 17, $false, 0, 0, 1, 1, 0, $true, $true, 1, $true, $true, $false); \
+                     }} catch {{ \
+                         $doc.SaveAs([ref]'{clean_out}', [ref]17); \
+                     }} \
+                     $doc.Close([ref]0); \
+                     $doc = $null; \
                  }} finally {{ \
-                     $word.Quit(); \
+                     if ($doc) {{ try {{ $doc.Close([ref]0); [System.Runtime.InteropServices.Marshal]::ReleaseComObject($doc) | Out-Null; }} catch {{}} }} \
+                     if ($word) {{ try {{ $word.Quit([ref]0); [System.Runtime.InteropServices.Marshal]::ReleaseComObject($word) | Out-Null; }} catch {{}} }} \
+                     [System.GC]::Collect(); \
+                     [System.GC]::WaitForPendingFinalizers(); \
                  }}",
                 clean_in = clean_input.replace("\\", "\\\\"),
                 clean_out = clean_output.replace("\\", "\\\\"),
             );
 
             let status = Command::new("powershell")
-                .args(&["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", &script])
+                .args(&["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", &script])
                 .status()?;
 
             if !status.success() {
